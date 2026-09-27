@@ -1,0 +1,11 @@
+customtkinter
+# Necesario para cargar y mostrar el logo dentro de la app (CTkImage usa PIL).
+# customtkinter ya trae Pillow como dependencia en la mayoría de instalaciones,
+# pero se deja explícito para evitar sorpresas al construir el .exe.
+Pillow
+# Optional but recommended: lets the launcher correctly detect when
+# games with a launcher/anti-cheat stub .exe have actually closed,
+# instead of trusting the stub process's (often near-instant) exit.
+# Without it the app still works, just with the original, less reliable
+# "wait for the exact process I started" behavior.
+psutil
