@@ -31,7 +31,7 @@ location or require administrator privileges.
 
 ## Optional Universal UE4 Unlocker (UUU) injection
 
-The launcher allows for the optional use of **Universal UE4 Unlocker (UUU)**
+The launcher allows for the optional use of **[Universal UE4 Unlocker (UUU)](https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm)**
 via the settings for each profile. You can enable or disable the use of UUU
 via the corresponding checkbox, so it is not necessary to use UUU
 for every game.
@@ -121,7 +121,7 @@ por cada juego.
   
 ## Inyección opcional de Universal UE4 Unlocker (UUU)
 
-El launcher permite usar **Universal UE4 Unlocker (UUU)** de forma opcional
+El launcher permite usar **[Universal UE4 Unlocker (UUU)](https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm)** de forma opcional
 desde los ajustes de cada perfil. Puedes activar o desactivar el uso de UUU
 mediante la casilla correspondiente, por lo que no es necesario utilizar UUU
 en todos los juegos.
