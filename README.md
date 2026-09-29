@@ -39,10 +39,6 @@ for every game.
 The setting is saved with the game profile, meaning each profile
 can have its own configuration.
 
-To use UUU, place the necessary files in the project's `tools/` folder
-and enable the **Use Universal UE4 Unlocker (UUU)** option in the
-corresponding profile.
-
 ## Requirements
 
 - Python 3.10+ (only if running or compiling from source code)
@@ -128,10 +124,6 @@ en todos los juegos.
 
 La opción se guarda junto con el perfil del juego, de modo que cada perfil
 puede tener su propia configuración.
-
-Para utilizar UUU, coloca los archivos necesarios en la carpeta `tools/` del
-proyecto y activa la opción **Usar Universal UE4 Unlocker (UUU)** en el perfil
-correspondiente.
 
 ## Requisitos
 
