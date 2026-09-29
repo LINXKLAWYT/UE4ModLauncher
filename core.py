@@ -4,6 +4,7 @@ import json
 import time
 import shutil
 import subprocess
+import threading
 from datetime import datetime
 
 from config import PROFILES_DIR, STATE_FILE
@@ -305,6 +306,7 @@ class ModLogic:
         except Exception:
             # This is a best-effort safety net - never let it break launching.
             return
+
 
     # ---------------- main entry point ----------------
 
