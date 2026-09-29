@@ -30,7 +30,7 @@ class ModLauncher(ctk.CTk):
 
         # Main window setup
         self.title(self.cfg.get_text("title"))
-        self.geometry("920x600")
+        self.geometry("920x800")
         self.resizable(False, False)
         self._set_window_icon(self)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -167,6 +167,15 @@ class ModLauncher(ctk.CTk):
         self.ent_paks.pack(fill="x", padx=15, pady=5)
         self.btn_browse_paks = ctk.CTkButton(self.right_frame, text=self.cfg.get_text("btn_browse"), command=lambda: self.browse_path(self.ent_paks, is_file=False))
         self.btn_browse_paks.pack(anchor="e", padx=15)
+
+        self.chk_uuu_var = ctk.BooleanVar(value=False)
+        self.chk_uuu = ctk.CTkCheckBox(
+            self.right_frame,
+            text=self.cfg.get_text("cfg_uuu"),
+            variable=self.chk_uuu_var
+        )
+        self.chk_uuu.pack(anchor="w", padx=15, pady=(20, 0))
+
 
         self.btn_save = ctk.CTkButton(self.right_frame, text=self.cfg.get_text("btn_save"), command=self.save_profile_data, fg_color="#0078D7")
         self.btn_save.pack(fill="x", padx=15, pady=(20, 15))
@@ -406,8 +415,8 @@ class ModLauncher(ctk.CTk):
         self.load_mods_list()
 
     def load_profile_data(self, profile_name):
-        self.ent_exe.delete(0, 'end')
-        self.ent_paks.delete(0, 'end')
+        for ent in (self.ent_exe, self.ent_paks):
+            ent.delete(0, 'end')
 
         if profile_name == "---":
             return
@@ -419,6 +428,7 @@ class ModLauncher(ctk.CTk):
                     cfg = json.load(f)
                 self.ent_exe.insert(0, cfg.get("exe_path", ""))
                 self.ent_paks.insert(0, cfg.get("paks_path", ""))
+                self.chk_uuu_var.set(bool(cfg.get("use_uuu", False)))
             except (OSError, json.JSONDecodeError):
                 pass
 
@@ -452,11 +462,20 @@ class ModLauncher(ctk.CTk):
             return  # profile was deleted/renamed since being selected
         cfg_file = os.path.join(prof_dir, "profile_config.json")
         try:
+            existing = {}
+            if os.path.exists(cfg_file):
+                try:
+                    with open(cfg_file, 'r', encoding='utf-8') as f:
+                        existing = json.load(f)
+                except (OSError, json.JSONDecodeError):
+                    existing = {}
+            existing.update({
+                "exe_path": self.ent_exe.get().strip(),
+                "paks_path": self.ent_paks.get().strip(),
+                "use_uuu": bool(self.chk_uuu_var.get()),
+            })
             with open(cfg_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    "exe_path": self.ent_exe.get().strip(),
-                    "paks_path": self.ent_paks.get().strip(),
-                }, f, indent=4)
+                json.dump(existing, f, indent=4)
         except OSError:
             pass
 
@@ -466,6 +485,12 @@ class ModLauncher(ctk.CTk):
         original = self.cfg.get_text("btn_save")
         self.btn_save.configure(text="✓")
         self.after(1200, lambda: self.btn_save.configure(text=original))
+
+    def browse_file(self, entry_widget, label, pattern):
+        path = filedialog.askopenfilename(filetypes=[(label, pattern)])
+        if path:
+            entry_widget.delete(0, 'end')
+            entry_widget.insert(0, path)
 
     def browse_path(self, entry_widget, is_file):
         path = filedialog.askopenfilename(filetypes=[("Executable", "*.exe")]) if is_file else filedialog.askdirectory()
@@ -509,6 +534,7 @@ class ModLauncher(ctk.CTk):
         self.btn_browse_exe.configure(text=self.cfg.get_text("btn_browse"))
         self.btn_browse_paks.configure(text=self.cfg.get_text("btn_browse"))
         self.btn_save.configure(text=self.cfg.get_text("btn_save"))
+        self.chk_uuu.configure(text=self.cfg.get_text("cfg_uuu"))
         self.refresh_profile_panel()
         self.load_mods_list()
 
