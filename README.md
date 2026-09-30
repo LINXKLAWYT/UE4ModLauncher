@@ -31,13 +31,21 @@ location or require administrator privileges.
 
 ## Optional Universal UE4 Unlocker (UUU) injection
 
-The launcher allows for the optional use of **[Universal UE4 Unlocker (UUU)](https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm)**
+The launcher allows for the optional use of **Universal UE4 Unlocker (UUU)**
 via the settings for each profile. You can enable or disable the use of UUU
 via the corresponding checkbox, so it is not necessary to use UUU
 for every game.
 
 The setting is saved with the game profile, meaning each profile
 can have its own configuration.
+
+## Update check
+
+Every time the app starts it checks the latest release on GitHub in the
+background. If a newer version exists, it offers to open the
+[releases page](https://github.com/LINXKLAWYT/UE4ModLauncher/releases). If
+you are offline or there is nothing new, nothing is shown. When you publish a
+release, set `APP_VERSION` in `config.py` to the same number as the release tag.
 
 ## Requirements
 
@@ -117,13 +125,21 @@ por cada juego.
   
 ## Inyección opcional de Universal UE4 Unlocker (UUU)
 
-El launcher permite usar **[Universal UE4 Unlocker (UUU)](https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm)** de forma opcional
+El launcher permite usar **Universal UE4 Unlocker (UUU)** de forma opcional
 desde los ajustes de cada perfil. Puedes activar o desactivar el uso de UUU
 mediante la casilla correspondiente, por lo que no es necesario utilizar UUU
 en todos los juegos.
 
 La opción se guarda junto con el perfil del juego, de modo que cada perfil
 puede tener su propia configuración.
+
+## Buscar actualizaciones
+
+Cada vez que abres la aplicación se comprueba en segundo plano la última
+release de GitHub. Si hay una versión más nueva, te ofrece abrir la
+[página de releases](https://github.com/LINXKLAWYT/UE4ModLauncher/releases).
+Sin conexión o sin novedades no se muestra nada. Al publicar una release,
+pon en `APP_VERSION` (`config.py`) el mismo número que el tag de la release.
 
 ## Requisitos
 

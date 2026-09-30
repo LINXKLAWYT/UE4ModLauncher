@@ -7,6 +7,13 @@ import shutil
 
 APP_NAME = "UE4ModLauncher"
 
+# Bump this on every release so it matches the tag you publish on GitHub
+# (e.g. tag "v1.2.0" -> APP_VERSION = "1.2.0"); the update check compares them.
+APP_VERSION = "1.2"
+GITHUB_REPO = "LINXKLAWYT/UE4ModLauncher"
+RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
+LATEST_RELEASE_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+
 
 def get_base_dir():
     """
@@ -142,6 +149,8 @@ LANG = {
         "err_no_profile": "Create a profile first with the '➕ New' button.",
         "err_open_folder": "Could not open the folder.",
         "err_copy_mods": "Could not copy the following file(s):\n{files}",
+        "update_title": "Update available",
+        "update_msg": "A new version is available: {latest} (you have {current}).\n\nOpen the download page on GitHub?",
         "app_settings_title": "Settings",
         "no_profile_panel_hint": "No profile selected",
     },
@@ -183,6 +192,8 @@ LANG = {
         "err_no_profile": "Crea un perfil primero con el botón '➕ Nuevo'.",
         "err_open_folder": "No se pudo abrir la carpeta.",
         "err_copy_mods": "No se pudieron copiar estos archivos:\n{files}",
+        "update_title": "Actualización disponible",
+        "update_msg": "Hay una nueva versión disponible: {latest} (tienes la {current}).\n\n¿Abrir la página de descargas en GitHub?",
         "app_settings_title": "Ajustes",
         "no_profile_panel_hint": "Ningún perfil seleccionado",
     }

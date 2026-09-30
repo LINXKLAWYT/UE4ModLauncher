@@ -3,11 +3,13 @@ import re
 import json
 import queue
 import threading
+import webbrowser
 import customtkinter as ctk
 from tkinter import messagebox, filedialog, simpledialog
 from PIL import Image
-from config import ConfigManager, PROFILES_DIR, LOGO_PNG, ICON_ICO
+from config import ConfigManager, PROFILES_DIR, LOGO_PNG, ICON_ICO, APP_VERSION
 from core import ModLogic
+import updater
 
 # Global visual configuration for CustomTkinter
 ctk.set_appearance_mode("dark")
@@ -27,6 +29,7 @@ class ModLauncher(ctk.CTk):
         self._mods_poll_id = None      # tracks the mods-list auto-refresh timer
         self._result_queue = queue.Queue()  # worker thread -> main thread handoff
         self._current_profile = None   # profile whose fields are currently shown on the right
+        self._update_queue = queue.Queue()  # update-check thread -> main thread
 
         # Main window setup
         self.title(self.cfg.get_text("title"))
@@ -42,6 +45,9 @@ class ModLauncher(ctk.CTk):
         # If the launcher was killed/crashed while a game had mods deployed
         # in its folder, recover them now instead of leaving them stranded.
         self.after(300, self._check_recovery)
+
+        # Look for a newer release on GitHub (background thread, never blocks the UI).
+        self.after(1200, self._start_update_check)
 
     @staticmethod
     def _set_window_icon(window):
@@ -299,6 +305,31 @@ class ModLauncher(ctk.CTk):
                 self.cfg.get_text("recovered_title"),
                 self.cfg.get_text("recovery_failed_msg", profile=recovery.get("profile", ""))
             )
+
+    # ==================================================================
+    # Update check
+    # ==================================================================
+
+    def _start_update_check(self):
+        threading.Thread(
+            target=lambda: self._update_queue.put(updater.check_for_update()),
+            daemon=True,
+        ).start()
+        self.after(500, self._poll_update_result)
+
+    def _poll_update_result(self):
+        try:
+            info = self._update_queue.get_nowait()
+        except queue.Empty:
+            self.after(500, self._poll_update_result)
+            return
+        if not info:
+            return
+        if messagebox.askyesno(
+            self.cfg.get_text("update_title"),
+            self.cfg.get_text("update_msg", latest=info["latest"], current=APP_VERSION),
+        ):
+            webbrowser.open(info["url"])
 
     # ==================================================================
     # Launching (non-blocking)
