@@ -182,6 +182,14 @@ class ModLauncher(ctk.CTk):
         )
         self.chk_uuu.pack(anchor="w", padx=15, pady=(20, 0))
 
+        self.lbl_cfg_uuu_dll = ctk.CTkLabel(self.right_frame, text=self.cfg.get_text("cfg_uuu_dll"))
+        self.lbl_cfg_uuu_dll.pack(anchor="w", padx=15, pady=(10, 0))
+        self.ent_uuu_dll = ctk.CTkEntry(self.right_frame)
+        self.ent_uuu_dll.pack(fill="x", padx=15, pady=5)
+        self.btn_browse_uuu_dll = ctk.CTkButton(
+            self.right_frame, text=self.cfg.get_text("btn_browse"),
+            command=lambda: self.browse_file(self.ent_uuu_dll, "DLL", "*.dll"))
+        self.btn_browse_uuu_dll.pack(anchor="e", padx=15)
 
         self.btn_save = ctk.CTkButton(self.right_frame, text=self.cfg.get_text("btn_save"), command=self.save_profile_data, fg_color="#0078D7")
         self.btn_save.pack(fill="x", padx=15, pady=(20, 15))
@@ -341,6 +349,10 @@ class ModLauncher(ctk.CTk):
             messagebox.showinfo(self.cfg.get_text("err_launch_title"), self.cfg.get_text("err_no_profile"))
             return
 
+        if not self._uuu_selection_ok():
+            messagebox.showerror(self.cfg.get_text("err_launch_title"), self.cfg.get_text("err_uuu_dll"))
+            return
+
         # Make sure Play uses whatever is currently shown in the fields,
         # even if "Guardar" was never explicitly clicked.
         self._persist_profile_fields(prof)
@@ -446,8 +458,9 @@ class ModLauncher(ctk.CTk):
         self.load_mods_list()
 
     def load_profile_data(self, profile_name):
-        for ent in (self.ent_exe, self.ent_paks):
+        for ent in (self.ent_exe, self.ent_paks, self.ent_uuu_dll):
             ent.delete(0, 'end')
+        self.chk_uuu_var.set(False)
 
         if profile_name == "---":
             return
@@ -459,6 +472,7 @@ class ModLauncher(ctk.CTk):
                     cfg = json.load(f)
                 self.ent_exe.insert(0, cfg.get("exe_path", ""))
                 self.ent_paks.insert(0, cfg.get("paks_path", ""))
+                self.ent_uuu_dll.insert(0, cfg.get("uuu_dll_path", ""))
                 self.chk_uuu_var.set(bool(cfg.get("use_uuu", False)))
             except (OSError, json.JSONDecodeError):
                 pass
@@ -473,8 +487,20 @@ class ModLauncher(ctk.CTk):
             messagebox.showerror("Error", self.cfg.get_text("err_fields"))
             return
 
+        if not self._uuu_selection_ok():
+            messagebox.showerror("Error", self.cfg.get_text("err_uuu_dll"))
+            return
+
         self._persist_profile_fields(prof)
         self._flash_save_button()
+
+    def _uuu_selection_ok(self):
+        """True if UUU is off, or if it is on and a real .dll was selected
+        from the app (the launcher doesn't ship or look for it anywhere)."""
+        if not self.chk_uuu_var.get():
+            return True
+        path = self.ent_uuu_dll.get().strip()
+        return os.path.isfile(path) and path.lower().endswith(".dll")
 
     def _persist_profile_fields(self, profile_name):
         """
@@ -504,6 +530,7 @@ class ModLauncher(ctk.CTk):
                 "exe_path": self.ent_exe.get().strip(),
                 "paks_path": self.ent_paks.get().strip(),
                 "use_uuu": bool(self.chk_uuu_var.get()),
+                "uuu_dll_path": self.ent_uuu_dll.get().strip(),
             })
             with open(cfg_file, 'w', encoding='utf-8') as f:
                 json.dump(existing, f, indent=4)
@@ -566,6 +593,8 @@ class ModLauncher(ctk.CTk):
         self.btn_browse_paks.configure(text=self.cfg.get_text("btn_browse"))
         self.btn_save.configure(text=self.cfg.get_text("btn_save"))
         self.chk_uuu.configure(text=self.cfg.get_text("cfg_uuu"))
+        self.lbl_cfg_uuu_dll.configure(text=self.cfg.get_text("cfg_uuu_dll"))
+        self.btn_browse_uuu_dll.configure(text=self.cfg.get_text("btn_browse"))
         self.refresh_profile_panel()
         self.load_mods_list()
 

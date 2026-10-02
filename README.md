@@ -36,8 +36,28 @@ via the settings for each profile. You can enable or disable the use of UUU
 via the corresponding checkbox, so it is not necessary to use UUU
 for every game.
 
-The setting is saved with the game profile, meaning each profile
-can have its own configuration.
+To use it, tick the checkbox and select the `UniversalUE4Unlocker.dll` file
+with the **Browse** button. The launcher does not include UUU or look for it
+in any folder: you choose the file yourself. If the checkbox is on and no
+valid `.dll` is selected, the profile cannot be saved or started.
+
+The setting and the selected file are saved with the game profile, meaning
+each profile can have its own configuration.
+
+### Where to install / download UUU
+
+The launcher does **not** include the Universal UE4 Unlocker binaries. Download
+the UUU directly from the official FRAMED guide:
+
+**Official Universal UE4 Unlocker page:**  
+https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm
+
+The FRAMED page currently lists **Universal UE4 Unlocker v3.0.21** and states
+that the UUU v3 binaries are distributed only from that site. After downloading
+the UUU ZIP from there, extract it to a folder and select
+`UniversalUE4Unlocker.dll` in this launcher with **Browse**.
+
+Do not download or redistribute the UUU binaries from unofficial mirrors.
 
 ## Update check
 
@@ -70,10 +90,12 @@ automatically).
 ## Compiling the .exe
 
 ```
-pyinstaller --noconfirm --clean --onefile --windowed --icon=icon.ico --add-data "logo.png;." --add-data "icon.ico;." --add-data "herramientas;herramientas" --name "UE4ModLauncher" main.py
+pyinstaller --noconfirm --clean --onefile --windowed --icon=icon.ico --add-data "logo.png;." --add-data "icon.ico;." --name "UE4ModLauncher" main.py
 ```
 
-The resulting executable is located at `dist\UE4ModLauncher.exe`. ## Project Structure
+The resulting executable is located at `dist\UE4ModLauncher.exe`.
+
+## Project Structure
 
 - `main.py` — Graphical interface (CustomTkinter)
 - `core.py` — Profile logic, mod management, and game launching
@@ -130,8 +152,28 @@ desde los ajustes de cada perfil. Puedes activar o desactivar el uso de UUU
 mediante la casilla correspondiente, por lo que no es necesario utilizar UUU
 en todos los juegos.
 
-La opción se guarda junto con el perfil del juego, de modo que cada perfil
-puede tener su propia configuración.
+Para usarlo, marca la casilla y selecciona el archivo `UniversalUE4Unlocker.dll`
+con el botón **Buscar**. El launcher no incluye el UUU ni lo busca en ninguna
+carpeta: el archivo lo eliges tú. Si la casilla está marcada y no hay un
+`.dll` válido seleccionado, no se puede guardar ni iniciar el perfil.
+
+La opción y el archivo seleccionado se guardan junto con el perfil del juego,
+de modo que cada perfil puede tener su propia configuración.
+
+### Dónde descargar / instalar UUU
+
+El launcher **no incluye los binarios del Universal UE4 Unlocker**. Descarga
+el UUU directamente desde la guía oficial de FRAMED:
+
+**Página oficial de Universal UE4 Unlocker:**  
+https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm
+
+La página de FRAMED muestra actualmente **Universal UE4 Unlocker v3.0.21** y
+indica que los binarios de UUU v3 se distribuyen únicamente desde ese sitio.
+Después de descargar el ZIP del UUU desde allí, extráelo en una carpeta y
+selecciona `UniversalUE4Unlocker.dll` en este launcher con **Buscar**.
+
+No descargues ni redistribuyas los binarios del UUU desde mirrors no oficiales.
 
 ## Buscar actualizaciones
 
@@ -164,7 +206,7 @@ pon en `APP_VERSION` (`config.py`) el mismo número que el tag de la release.
 ## Compilar el .exe
 
 ```
-pyinstaller --noconfirm --clean --onefile --windowed --icon=icon.ico --add-data "logo.png;." --add-data "icon.ico;." --add-data "tools;tools" --name "UE4ModLauncher" main.py
+pyinstaller --noconfirm --clean --onefile --windowed --icon=icon.ico --add-data "logo.png;." --add-data "icon.ico;." --name "UE4ModLauncher" main.py
 ```
 
 El ejecutable resultante queda en `dist\UE4ModLauncher.exe`.

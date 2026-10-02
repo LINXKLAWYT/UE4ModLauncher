@@ -1,1 +1,1 @@
-pyinstaller --noconfirm --clean --onefile --windowed --icon=icon.ico --add-data "logo.png;." --add-data "icon.ico;." --add-data "tools;tools" --name "UE4ModLauncher" main.py
+pyinstaller --noconfirm --clean --onefile --windowed --icon=icon.ico --add-data "logo.png;." --add-data "icon.ico;." --name "UE4ModLauncher" main.py
