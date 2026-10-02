@@ -19,7 +19,6 @@ except ImportError:
     # game and exiting early. `pip install psutil` to enable it.
     HAS_PSUTIL = False
 
-
 class ModLogic:
 
     # ---------------- basic filesystem helpers ----------------
