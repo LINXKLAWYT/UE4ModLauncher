@@ -27,8 +27,9 @@ a{color:inherit}
 .brand{font-family:Consolas,"Cascadia Mono",ui-monospace,monospace;font-weight:700;letter-spacing:.2px;text-decoration:none;font-size:15px;color:var(--ink)}
 .brand span{color:var(--accent)}
 nav.primary{display:none;gap:28px;align-items:center}
-nav.primary a{color:var(--muted);text-decoration:none;font-size:14.5px}
+nav.primary a{color:var(--muted);text-decoration:none;font-size:14.5px;padding:4px 0;border-bottom:2px solid transparent}
 nav.primary a:hover{color:var(--ink)}
+nav.primary a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
 @media (min-width:860px){nav.primary{display:flex}}
 .tools{display:flex;gap:10px;align-items:center}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
@@ -83,7 +84,8 @@ section + section{border-top:1px solid var(--line)}
 .feature p{color:var(--muted);margin:0;font-size:14.5px;max-width:42ch}
 
 .steps{counter-reset:step;display:grid;gap:28px}
-@media (min-width:700px){.steps{grid-template-columns:repeat(4,1fr);gap:20px}}
+@media (min-width:700px){.steps{grid-template-columns:repeat(2,1fr);gap:28px 20px}}
+@media (min-width:1100px){.steps{grid-template-columns:repeat(4,1fr);gap:20px}}
 .step{position:relative;padding-left:0}
 .step-num{font-family:Consolas,"Cascadia Mono",ui-monospace,monospace;color:var(--accent);font-size:13px;margin:0 0 10px}
 .step h3{font-size:15.5px;margin:0 0 6px}
@@ -99,17 +101,36 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
 .foot-links{display:flex;gap:20px;flex-wrap:wrap}
 .foot-links a{color:var(--muted);text-decoration:none}
 .foot-links a:hover{color:var(--ink)}
+
+/* ---------- page shell: sidebar index + content (same as Help) ---------- */
+.below{border-top:1px solid var(--line)}
+.shell{max-width:var(--content-max);margin:0 auto;padding:0 24px;display:block}
+@media (min-width:900px){.shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px;align-items:start}}
+.sidebar{display:none}
+@media (min-width:900px){.sidebar{display:block;position:sticky;top:76px;padding:72px 0 36px}}
+.sidebar-label{font-size:13px;color:var(--muted);margin:0 0 10px}
+.sidebar nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.sidebar nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:14.5px;border-left:2px solid transparent}
+.sidebar nav a:hover{color:var(--ink);background:var(--surface)}
+.sidebar nav a.active{color:var(--accent);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:28px 0 0;list-style:none}
+.jump a{display:block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:var(--surface)}
+.jump a:hover,.jump a.active{border-color:var(--accent);color:var(--accent)}
+@media (min-width:900px){.jump{display:none}}
+.shell main{min-width:0}
+.shell section[id]{scroll-margin-top:84px}
+.navlink:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="bar-in">
-    <a class="brand" href="./">UE4<span>Mod</span>Launcher</a>
+    <a class="brand" href="index.html">UE4<span>Mod</span>Launcher</a>
     <nav class="primary" aria-label="Principal">
-      <a href="#features"><span lang="es">Características</span><span lang="en">Features</span></a>
-      <a href="#how"><span lang="es">Cómo funciona</span><span lang="en">How it works</span></a>
-      <a href="help/"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="index.html" class="active" aria-current="page"><span lang="es">Inicio</span><span lang="en">Home</span></a>
+      <a href="download.html"><span lang="es">Descargas</span><span lang="en">Downloads</span></a>
+      <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
       <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
     </nav>
     <div class="tools">
@@ -117,7 +138,7 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
         <button type="button" data-set="es" aria-pressed="true">ES</button>
         <button type="button" data-set="en" aria-pressed="false">EN</button>
       </div>
-      <a class="btn" href="https://github.com/LINXKLAWYT/UE4ModLauncher/releases" target="_blank" rel="noopener">
+      <a class="btn" href="download.html">
         <span lang="es">Descargar</span><span lang="en">Download</span>
       </a>
     </div>
@@ -138,7 +159,7 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
         <span lang="en">UE4 Mod Launcher drops your <span class="mono">.pak</span> files into the game when you hit Play, and pulls them back out the moment you close it. One profile per game, nothing to copy by hand.</span>
       </p>
       <div class="cta-row">
-        <a class="btn big" href="https://github.com/LINXKLAWYT/UE4ModLauncher/releases" target="_blank" rel="noopener">
+        <a class="btn big" href="download.html">
           <span lang="es">Descargar para Windows</span><span lang="en">Download for Windows</span>
         </a>
         <a class="btn outline big" href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">Ver en GitHub</a>
@@ -162,9 +183,29 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
   </div>
 </section>
 
+<div class="below">
+<div class="shell">
+  <aside class="sidebar">
+    <p class="sidebar-label"><span lang="es">En esta página</span><span lang="en">On this page</span></p>
+    <nav aria-label="Secciones">
+      <ul>
+        <li><a class="navlink" href="#features"><span lang="es">Características</span><span lang="en">Features</span></a></li>
+        <li><a class="navlink" href="#how"><span lang="es">Cómo funciona</span><span lang="en">How it works</span></a></li>
+        <li><a class="navlink" href="#help"><span lang="es">¿Necesitas ayuda?</span><span lang="en">Need help?</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main>
+    <ul class="jump">
+      <li><a class="navlink" href="#features"><span lang="es">Características</span><span lang="en">Features</span></a></li>
+      <li><a class="navlink" href="#how"><span lang="es">Cómo funciona</span><span lang="en">How it works</span></a></li>
+      <li><a class="navlink" href="#help"><span lang="es">¿Necesitas ayuda?</span><span lang="en">Need help?</span></a></li>
+    </ul>
+
 <!-- ============ FEATURES ============ -->
 <section id="features">
-  <div class="wrap">
+  <div>
     <div class="section-head">
       <h2><span lang="es">Hecho para tener varios juegos modeados a la vez</span><span lang="en">Built for juggling more than one modded game</span></h2>
       <p><span lang="es">Cada juego tiene sus propias reglas. El launcher las recuerda por ti.</span><span lang="en">Every game has its own rules. The launcher remembers them for you.</span></p>
@@ -200,7 +241,7 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
 
 <!-- ============ HOW IT WORKS ============ -->
 <section id="how">
-  <div class="wrap">
+  <div>
     <div class="section-head">
       <h2><span lang="es">De cero a jugando, en cuatro pasos</span><span lang="en">Zero to playing, in four steps</span></h2>
     </div>
@@ -230,25 +271,28 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
 </section>
 
 <!-- ============ CTA ============ -->
-<section class="cta-section">
-  <div class="wrap">
+<section class="cta-section" id="help">
+  <div>
     <div class="cta-card">
       <div>
         <h2><span lang="es">¿Dudas al configurar un perfil?</span><span lang="en">Stuck setting up a profile?</span></h2>
         <p><span lang="es">La sección de ayuda explica dónde encontrar el .exe y la carpeta Paks de cada juego, y cómo evitar falsos positivos del antivirus.</span><span lang="en">The help section covers finding each game's .exe and Paks folder, and avoiding antivirus false positives.</span></p>
       </div>
-      <a class="btn big" href="help/"><span lang="es">Ir a Ayuda</span><span lang="en">Go to Help</span></a>
+      <a class="btn big" href="help.html"><span lang="es">Ir a Ayuda</span><span lang="en">Go to Help</span></a>
     </div>
   </div>
 </section>
+  </main>
+</div>
+</div>
 
 <footer>
   <div class="wrap foot-row">
     <span class="mono">UE4ModLauncher</span>
     <div class="foot-links">
-      <a href="help/"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
       <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher/releases" target="_blank" rel="noopener"><span lang="es">Versiones</span><span lang="en">Releases</span></a>
+      <a href="download.html"><span lang="es">Versiones</span><span lang="en">Releases</span></a>
       <a href="https://github.com/LINXKLAWYT/UE4ModLauncher/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
     </div>
   </div>
@@ -265,6 +309,18 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.set); }); });
   setLang((navigator.language || 'es').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+  // Highlight the current section in the index while scrolling.
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var navlinks = Array.prototype.slice.call(document.querySelectorAll('.navlink'));
+  function setActive(id) {
+    navlinks.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+  }
+  if ('IntersectionObserver' in window && sections.length) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) { setActive(entry.target.id); } });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
 })();
 </script>
 </body>

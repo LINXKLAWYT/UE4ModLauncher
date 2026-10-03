@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es" data-lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UE4 Mod Launcher · Descargas / Downloads</title>
+<meta name="description" content="Descarga UE4 Mod Launcher y consulta los cambios de cada versión.">
+<style>
+:root{
+  --bg:#eef1f5; --card:#ffffff; --ink:#1b2330; --muted:#54607a; --line:#d3dae5;
+  --accent:#c17f1e; --accent-ink:#ffffff; --code-bg:#e6ebf3; --warn:#fff3d6; --warn-line:#e3b341; --warn-ink:#5a4200;
+  --content-max:1120px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0b0d11; --card:#141821; --ink:#eef1f6; --muted:#8d96a8; --line:#252c38;
+    --accent:#e8a33d; --accent-ink:#1a1206; --code-bg:#1a212c; --warn:#2c2513; --warn-line:#a67c1a; --warn-ink:#f1d488;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+[data-lang="es"] [lang="en"], [data-lang="en"] [lang="es"]{display:none}
+
+/* ---------- top bar ---------- */
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar-in{max-width:var(--content-max);margin:0 auto;padding:14px 20px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.brand{font-family:Consolas,"Cascadia Mono",ui-monospace,monospace;font-weight:700;letter-spacing:.2px;text-decoration:none;font-size:15px;color:var(--ink)}
+.brand span{color:var(--accent)}
+nav.primary{display:none;gap:28px;align-items:center}
+nav.primary a{color:var(--muted);text-decoration:none;font-size:14.5px;padding:4px 0;border-bottom:2px solid transparent}
+nav.primary a:hover{color:var(--ink)}
+nav.primary a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+@media (min-width:860px){nav.primary{display:flex}}
+.tools{display:flex;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.seg button:focus-visible,.btn:focus-visible,.path:focus-visible,a:focus-visible,.navlink:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:700;padding:9px 16px;border-radius:8px;border:0;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.big{padding:13px 24px;font-size:17px}
+
+/* ---------- page shell: sidebar + content ---------- */
+.shell{max-width:var(--content-max);margin:0 auto;padding:0 20px;display:block}
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px;align-items:start}
+}
+
+.sidebar{display:none}
+@media (min-width:900px){
+  .sidebar{display:block;position:sticky;top:76px;padding:36px 0}
+}
+.sidebar-label{font-size:13px;color:var(--muted);margin:0 0 10px}
+.sidebar nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.sidebar nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:14.5px;border-left:2px solid transparent}
+.sidebar nav a:hover{color:var(--ink);background:var(--card)}
+.sidebar nav a.active{color:var(--accent);border-left-color:var(--accent);font-weight:600;background:var(--card)}
+
+/* mobile section jump list, replaces the sidebar under 900px */
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 36px;padding:0;list-style:none}
+.jump a{display:block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:var(--card)}
+.jump a:hover,.jump a.active{border-color:var(--accent);color:var(--accent)}
+@media (min-width:900px){.jump{display:none}}
+
+main{min-width:0;padding:36px 0 72px}
+h1{font-size:clamp(28px,4.2vw,40px);line-height:1.15;margin:0 0 12px}
+.lead{color:var(--muted);max-width:60ch;margin:0 0 20px}
+
+section{margin:0 0 56px;scroll-margin-top:84px}
+section + section{border-top:1px solid var(--line);padding-top:48px}
+h2{font-size:23px;margin:0 0 6px}
+h3{font-size:16.5px;margin:22px 0 6px}
+p{margin:0 0 12px;max-width:66ch}
+section>p.sub,div>p.sub{color:var(--muted)}
+ol,ul{margin:0 0 12px;padding-left:22px;max-width:66ch}
+li{margin:4px 0}
+code,.path{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--code-bg);padding:2px 6px;border-radius:5px;overflow-wrap:anywhere}
+.path{cursor:pointer;border:0;color:inherit;display:inline-block}
+.path.ok{outline:2px solid var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+.card>h3:first-child{margin-top:0}
+.note{background:var(--warn);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:10px;padding:12px 16px;margin:16px 0;max-width:66ch}
+.note p{margin:0}
+.cta{border-top:1px solid var(--line);padding-top:48px}
+main a:not(.btn):not(.navlink){color:var(--accent)}
+.wrap{max-width:var(--content-max);margin:0 auto;padding:0 20px}
+footer{padding:36px 0;color:var(--muted);font-size:13.5px}
+.mono{font-family:Consolas,"Cascadia Mono",ui-monospace,"SFMono-Regular",monospace}
+.foot-row{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;justify-content:space-between}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{color:var(--muted);text-decoration:none}
+.foot-links a:hover{color:var(--ink)}
+
+/* ---------- download page ---------- */
+.ver-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:0 0 14px}
+.ver-head h2{margin:0}
+.badge{display:inline-block;margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);font-size:12.5px;font-weight:600;vertical-align:middle}
+.btn.outline{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.outline:hover{border-color:var(--muted)}
+h3.cl{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:22px 0 6px}
+.todo{color:var(--muted);font-style:italic}
+.dl-note{max-width:66ch}
+#releases > section{border-top:1px solid var(--line);padding-top:48px}
+.ver-date{color:var(--muted);font-size:13.5px;margin-left:10px;font-weight:400}
+button.btn{font:inherit;font-weight:700}
+.btn[disabled]{opacity:.6;cursor:default;filter:none}
+.rel-tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 18px}
+.rel-note{color:var(--muted);font-size:13.5px}
+.md p,.md ul,.md ol{max-width:66ch}
+.md h3.cl:first-child{margin-top:0}
+
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="index.html">UE4<span>Mod</span>Launcher</a>
+    <nav class="primary" aria-label="Principal">
+      <a href="index.html"><span lang="es">Inicio</span><span lang="en">Home</span></a>
+      <a href="download.html" class="active" aria-current="page"><span lang="es">Descargas</span><span lang="en">Downloads</span></a>
+      <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Idioma / Language">
+        <button type="button" data-set="es" aria-pressed="true">ES</button>
+        <button type="button" data-set="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn" href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <p class="sidebar-label"><span lang="es">En esta página</span><span lang="en">On this page</span></p>
+    <nav aria-label="Secciones">
+      <ul id="idx-side">
+        <li><a class="navlink" href="#install"><span lang="es">Cómo instalar</span><span lang="en">How to install</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main>
+    <h1><span lang="es">Descargar UE4 Mod Launcher</span><span lang="en">Download UE4 Mod Launcher</span></h1>
+    <p class="lead">
+      <span lang="es">Las versiones se cargan solas desde GitHub. La última aparece primero; las anteriores siguen disponibles con la lista de cambios de cada una.</span>
+      <span lang="en">Versions load automatically from GitHub. The latest comes first; older ones stay available with each one's changelog.</span>
+    </p>
+    <ul class="jump" id="idx-chips">
+      <li><a class="navlink" href="#install"><span lang="es">Cómo instalar</span><span lang="en">How to install</span></a></li>
+    </ul>
+
+    <section id="install">
+      <div lang="es">
+        <h2>Cómo instalar</h2>
+        <ol>
+          <li>Descarga la versión que quieras en uno de los botones de abajo.</li>
+          <li>Si viene en un <code>.zip</code>, descomprímelo. Después abre <code>UE4ModLauncher.exe</code>: no necesita instalación.</li>
+          <li>Crea un perfil e indica el .exe y la carpeta Paks del juego. Si no sabes dónde están, mira la <a href="help.html">guía de ayuda</a>.</li>
+        </ol>
+        <div class="note dl-note"><p>Si el antivirus bloquea la descarga o el programa, casi siempre es un falso positivo. Cómo solucionarlo está en la <a href="help.html#av">sección del antivirus</a>; hazlo solo con archivos descargados desde esta página o desde el repositorio oficial.</p></div>
+      </div>
+      <div lang="en">
+        <h2>How to install</h2>
+        <ol>
+          <li>Download the version you want with one of the buttons below.</li>
+          <li>If it comes in a <code>.zip</code>, unpack it. Then open <code>UE4ModLauncher.exe</code>: it needs no installation.</li>
+          <li>Create a profile and point it at the game's .exe and Paks folder. If you don't know where they are, see the <a href="help.html">help guide</a>.</li>
+        </ol>
+        <div class="note dl-note"><p>If your antivirus blocks the download or the program, it is almost always a false positive. The fix is in the <a href="help.html#av">antivirus section</a>; only do it with files downloaded from this page or the official repository.</p></div>
+      </div>
+    </section>
+
+    <!-- Las versiones se generan solas en el navegador a partir de las releases de GitHub
+         (tags con el formato V1.2). Ver el script de abajo. -->
+    <div class="rel-tools">
+      <button type="button" class="btn outline" id="rel-reload">
+        <span lang="es">Recargar versiones</span><span lang="en">Reload versions</span>
+      </button>
+      <span class="rel-note" id="rel-updated" aria-live="polite"></span>
+    </div>
+
+    <div id="releases">
+      <p class="todo" id="rel-status"><span lang="es">Cargando versiones…</span><span lang="en">Loading versions…</span></p>
+      <noscript>
+        <p><a class="btn" href="https://github.com/LINXKLAWYT/UE4ModLauncher/releases" target="_blank" rel="noopener"><span lang="es">Ver las versiones en GitHub</span><span lang="en">See the versions on GitHub</span></a></p>
+      </noscript>
+    </div>
+
+    <section class="cta">
+      <div lang="es">
+        <p>¿Buscas el código fuente o todas las releases?</p>
+      </div>
+      <div lang="en">
+        <p>Looking for the source code or every release?</p>
+      </div>
+      <p><a class="btn outline" href="https://github.com/LINXKLAWYT/UE4ModLauncher/releases" target="_blank" rel="noopener"><span lang="es">Ver todas las versiones en GitHub</span><span lang="en">See all releases on GitHub</span></a></p>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap foot-row">
+    <span class="mono">UE4ModLauncher</span>
+    <div class="foot-links">
+      <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
+      <a href="download.html"><span lang="es">Versiones</span><span lang="en">Releases</span></a>
+      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var REPO = 'LINXKLAWYT/UE4ModLauncher';
+  var API = 'https://api.github.com/repos/' + REPO + '/releases?per_page=100';
+  var TAG_RE = /^V(\d+)\.(\d+)$/i;           // tags del tipo V1.2
+  var CACHE_KEY = 'ue4ml_releases_v1', CACHE_MS = 10 * 60 * 1000;
+
+  var root = document.documentElement;
+  var btns = document.querySelectorAll('.seg button');
+
+  function setLang(l) {
+    root.setAttribute('data-lang', l);
+    root.setAttribute('lang', l);
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+    document.title = l === 'es' ? 'UE4 Mod Launcher · Descargas' : 'UE4 Mod Launcher · Downloads';
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.set); }); });
+  setLang((navigator.language || 'es').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+
+  // ---------- helpers ----------
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function bi(es, en) { return '<span lang="es">' + es + '</span><span lang="en">' + en + '</span>'; }
+
+  // Enlace de descarga: .../releases/download/<TAG>/UE4ModLauncher.exe  (TAG tal cual, p. ej. V1.2)
+  function downloadUrl(tag) {
+    return 'https://github.com/' + REPO + '/releases/download/' + encodeURIComponent(tag) + '/UE4ModLauncher.exe';
+  }
+
+  // ---------- notas de la release (Markdown sencillo, siempre escapado) ----------
+  function inline(s) {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    return s;
+  }
+  function md(src) {
+    var lines = src.replace(/\r/g, '').split('\n'), out = [], list = null, code = false, para = [];
+    function endPara() { if (para.length) { out.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } }
+    function endList() { if (list) { out.push('</' + list + '>'); list = null; } }
+    lines.forEach(function (raw) {
+      var line = raw.replace(/\s+$/, ''), m;
+      if (/^\s*(```|````)/.test(line)) { endPara(); endList(); code = !code; return; }
+      if (code) { out.push('<p><code>' + esc(line) + '</code></p>'); return; }
+      if (!line.trim()) { endPara(); endList(); return; }
+      if ((m = line.match(/^#{1,6}\s+(.*)$/))) { endPara(); endList(); out.push('<h3 class="cl">' + inline(m[1]) + '</h3>'); return; }
+      if ((m = line.match(/^\s*[-*]\s+(.*)$/))) {
+        endPara(); if (list !== 'ul') { endList(); out.push('<ul>'); list = 'ul'; }
+        out.push('<li>' + inline(m[1]) + '</li>'); return;
+      }
+      if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) {
+        endPara(); if (list !== 'ol') { endList(); out.push('<ol>'); list = 'ol'; }
+        out.push('<li>' + inline(m[1]) + '</li>'); return;
+      }
+      endList(); para.push(line.trim());
+    });
+    endPara(); endList();
+    return out.join('\n');
+  }
+  // Si las notas traen una parte "Español" y otra "English", cada idioma muestra la suya.
+  function splitLangs(body) {
+    var es = [], en = [], cur = null, found = false;
+    body.replace(/\r/g, '').split('\n').forEach(function (line) {
+      var t = line.replace(/^[#\s*_]+/, '').replace(/[\s*_:]+$/, '').toLowerCase();
+      if (/^(español|espanol|spanish|es)$/.test(t)) { cur = es; found = true; return; }
+      if (/^(english|inglés|ingles|en)$/.test(t)) { cur = en; found = true; return; }
+      if (cur) cur.push(line);
+    });
+    return found ? { es: es.join('\n'), en: en.join('\n') } : { es: body, en: body };
+  }
+  function notes(text, ver) {
+    // quita el título repetido ("## UE4 Mod Launcher v1.2.0") si es la primera línea
+    var lines = text.replace(/\r/g, '').split('\n');
+    while (lines.length && !lines[0].trim()) lines.shift();
+    if (lines.length && /^#{1,6}\s+.*\d+\.\d+/.test(lines[0])) lines.shift();
+    var out = lines.join('\n').trim();
+    return out ? md(out) : '';
+  }
+
+  // ---------- datos ----------
+  function readCache(ignoreAge) {
+    try {
+      var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      if (c && c.data && (ignoreAge || Date.now() - c.t < CACHE_MS)) return c.data;
+    } catch (e) {}
+    return null;
+  }
+  function writeCache(data) { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), data: data })); } catch (e) {} }
+
+  function load(force) {
+    if (force) { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+    var cached = force ? null : readCache(false);
+    if (cached) return Promise.resolve(cached);
+    return fetch(API, { headers: { 'Accept': 'application/vnd.github+json' }, cache: force ? 'no-store' : 'default' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (list) {
+        var data = list.filter(function (r) { return !r.draft && TAG_RE.test(r.tag_name || ''); })
+          .map(function (r) {
+            var m = r.tag_name.match(TAG_RE);
+            return { tag: r.tag_name, major: +m[1], minor: +m[2], body: r.body || '', date: r.published_at || '', pre: !!r.prerelease };
+          });
+        writeCache(data);
+        return data;
+      })
+      .catch(function (err) {
+        var stale = force ? null : readCache(true);   // al recargar a mano no se enseñan datos viejos
+        if (stale) return stale;
+        throw err;
+      });
+  }
+
+  // ---------- pintado ----------
+  function render(data) {
+    data.sort(function (a, b) { return b.major - a.major || b.minor - a.minor; });
+    var holder = document.getElementById('releases');
+    var side = document.getElementById('idx-side'), chips = document.getElementById('idx-chips');
+    var html = '', idx = '';
+    clearIndex();
+
+    data.forEach(function (r, i) {
+      var ver = r.major + '.' + r.minor, id = 'v' + r.major + '-' + r.minor;
+      var parts = splitLangs(r.body), nEs = notes(parts.es, ver), nEn = notes(parts.en, ver);
+      var date = '';
+      if (r.date) {
+        var d = new Date(r.date);
+        date = '<span class="ver-date">' + bi(esc(d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })),
+                                              esc(d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }))) + '</span>';
+      }
+      var badge = '';
+      if (i === 0 && !r.pre) badge += '<span class="badge">' + bi('Última', 'Latest') + '</span>';
+      if (r.pre) badge += '<span class="badge">' + bi('Pre-lanzamiento', 'Pre-release') + '</span>';
+
+      html += '<section id="' + id + '">'
+        + '<div class="ver-head"><h2>' + bi('Versión ' + ver, 'Version ' + ver) + badge + date + '</h2>'
+        + '<a class="btn" href="' + esc(downloadUrl(r.tag)) + '">' + bi('Descargar ' + ver, 'Download ' + ver) + '</a></div>'
+        + '<h3 class="cl">' + bi('Cambios', 'Changelog') + '</h3>'
+        + '<div class="md" lang="es">' + (nEs || '<p class="todo">Sin notas para esta versión.</p>') + '</div>'
+        + '<div class="md" lang="en">' + (nEn || '<p class="todo">No notes for this version.</p>') + '</div>'
+        + '</section>';
+      idx += '<li data-dyn="1"><a class="navlink" href="#' + id + '">' + bi('Versión ' + ver, 'Version ' + ver) + '</a></li>';
+    });
+
+    if (!data.length) {
+      html = '<p class="todo">' + bi('Todavía no hay versiones publicadas.', 'No versions have been published yet.') + '</p>';
+    }
+    holder.innerHTML = html;
+    side.insertAdjacentHTML('beforeend', idx);
+    chips.insertAdjacentHTML('beforeend', idx);
+    initSpy();
+    if (location.hash && location.hash.length > 1) {
+      var el = null;
+      try { el = document.querySelector(location.hash); } catch (e) {}
+      if (el) el.scrollIntoView();
+    }
+  }
+
+  function clearIndex() {
+    document.querySelectorAll('#idx-side [data-dyn], #idx-chips [data-dyn]').forEach(function (li) { li.remove(); });
+  }
+
+  function showError() {
+    clearIndex();
+    initSpy();
+    document.getElementById('releases').innerHTML =
+      '<p class="todo">' + bi('No se pudieron cargar las versiones ahora mismo.', 'Could not load the versions right now.') + '</p>'
+      + '<p><a class="btn" href="https://github.com/' + REPO + '/releases" target="_blank" rel="noopener">'
+      + bi('Ver las versiones en GitHub', 'See the versions on GitHub') + '</a></p>';
+  }
+
+  // ---------- índice: resalta la sección actual al hacer scroll ----------
+  var observer = null;
+  function initSpy() {
+    var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+    var navlinks = Array.prototype.slice.call(document.querySelectorAll('.navlink'));
+    function setActive(id) {
+      navlinks.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+    }
+    if (observer) observer.disconnect();
+    if ('IntersectionObserver' in window && sections.length) {
+      observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) { if (entry.isIntersecting) { setActive(entry.target.id); } });
+      }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+      sections.forEach(function (s) { observer.observe(s); });
+    }
+  }
+  initSpy();
+
+  // ---------- carga y botón "Recargar versiones" ----------
+  var reloadBtn = document.getElementById('rel-reload');
+  var updated = document.getElementById('rel-updated');
+
+  function stamp() {
+    var t = new Date(), hh = ('0' + t.getHours()).slice(-2), mm = ('0' + t.getMinutes()).slice(-2);
+    updated.innerHTML = bi('Comprobado a las ' + hh + ':' + mm, 'Checked at ' + hh + ':' + mm);
+  }
+  function run(force) {
+    reloadBtn.disabled = true;
+    reloadBtn.setAttribute('aria-busy', 'true');
+    if (force) {
+      document.getElementById('releases').innerHTML =
+        '<p class="todo">' + bi('Cargando versiones…', 'Loading versions…') + '</p>';
+      clearIndex();
+    }
+    return load(force).then(render).catch(showError).then(function () {
+      stamp();
+      reloadBtn.disabled = false;
+      reloadBtn.removeAttribute('aria-busy');
+    });
+  }
+  reloadBtn.addEventListener('click', function () { run(true); });
+
+  run(false);
+})();
+</script>
+</body>
+</html>
