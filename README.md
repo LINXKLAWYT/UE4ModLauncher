@@ -36,13 +36,8 @@ via the settings for each profile. You can enable or disable the use of UUU
 via the corresponding checkbox, so it is not necessary to use UUU
 for every game.
 
-To use it, tick the checkbox and select the `UniversalUE4Unlocker.dll` file
-with the **Browse** button. The launcher does not include UUU or look for it
-in any folder: you choose the file yourself. If the checkbox is on and no
-valid `.dll` is selected, the profile cannot be saved or started.
-
-The setting and the selected file are saved with the game profile, meaning
-each profile can have its own configuration.
+The setting is saved with the game profile, meaning each profile
+can have its own configuration.
 
 ### Where to install / download UUU
 
@@ -97,10 +92,19 @@ The resulting executable is located at `dist\UE4ModLauncher.exe`.
 
 ## Project Structure
 
-- `main.py` — Graphical interface (CustomTkinter)
-- `core.py` — Profile logic, mod management, and game launching
-- `config.py` — Data paths, bundled resources (logo/icon), and interface text
-(ES/EN)
+- `main.py` — entry point
+- `ui/` — graphical interface (CustomTkinter), all inside a single window:
+  - `app.py` — main window, screen switching, update check
+  - `home_view.py` — profiles, mod list, play button, profile fields
+  - `settings_view.py` — settings screen (language, version)
+  - `banner.py` — in-window notification bar (replaces pop-up dialogs)
+- `core.py` — profile logic, mod management, and game launching
+- `updater.py` — GitHub update check
+- `config.py` — data paths, bundled resources (logo/icon), and interface text (ES/EN)
+
+The app opens no extra windows: settings is a screen, creating a profile is an
+inline form, and messages and confirmations (e.g. deleting a profile) appear in
+a bar inside the window. The only system dialogs left are the file/folder pickers.
 
 ## License
 
@@ -152,28 +156,8 @@ desde los ajustes de cada perfil. Puedes activar o desactivar el uso de UUU
 mediante la casilla correspondiente, por lo que no es necesario utilizar UUU
 en todos los juegos.
 
-Para usarlo, marca la casilla y selecciona el archivo `UniversalUE4Unlocker.dll`
-con el botón **Buscar**. El launcher no incluye el UUU ni lo busca en ninguna
-carpeta: el archivo lo eliges tú. Si la casilla está marcada y no hay un
-`.dll` válido seleccionado, no se puede guardar ni iniciar el perfil.
-
-La opción y el archivo seleccionado se guardan junto con el perfil del juego,
-de modo que cada perfil puede tener su propia configuración.
-
-### Dónde descargar / instalar UUU
-
-El launcher **no incluye los binarios del Universal UE4 Unlocker**. Descarga
-el UUU directamente desde la guía oficial de FRAMED:
-
-**Página oficial de Universal UE4 Unlocker:**  
-https://framedsc.com/GeneralGuides/universal_ue4_consoleunlocker.htm
-
-La página de FRAMED muestra actualmente **Universal UE4 Unlocker v3.0.21** y
-indica que los binarios de UUU v3 se distribuyen únicamente desde ese sitio.
-Después de descargar el ZIP del UUU desde allí, extráelo en una carpeta y
-selecciona `UniversalUE4Unlocker.dll` en este launcher con **Buscar**.
-
-No descargues ni redistribuyas los binarios del UUU desde mirrors no oficiales.
+La opción se guarda junto con el perfil del juego, de modo que cada perfil
+puede tener su propia configuración.
 
 ## Buscar actualizaciones
 
@@ -213,10 +197,20 @@ El ejecutable resultante queda en `dist\UE4ModLauncher.exe`.
 
 ## Estructura del proyecto
 
-- `main.py` — interfaz gráfica (CustomTkinter)
+- `main.py` — punto de entrada
+- `ui/` — interfaz gráfica (CustomTkinter), todo dentro de una sola ventana:
+  - `app.py` — ventana principal, cambio de pantallas, búsqueda de actualizaciones
+  - `home_view.py` — perfiles, lista de mods, botón de jugar y campos del perfil
+  - `settings_view.py` — pantalla de ajustes (idioma, versión)
+  - `banner.py` — barra de avisos dentro de la ventana (sustituye a los cuadros emergentes)
 - `core.py` — lógica de perfiles, movimiento de mods y lanzamiento del juego
-- `config.py` — rutas de datos, recursos empaquetados (logo/icono) y textos
-  de la interfaz (ES/EN)
+- `updater.py` — comprobación de actualizaciones en GitHub
+- `config.py` — rutas de datos, recursos empaquetados (logo/icono) y textos de la interfaz (ES/EN)
+
+La aplicación no abre ventanas aparte: los ajustes son una pantalla, crear un
+perfil es un formulario en línea, y los mensajes y confirmaciones (por ejemplo,
+eliminar un perfil) aparecen en una barra dentro de la ventana. Lo único que
+queda son los selectores de archivos y carpetas del sistema.
 
 ## Licencia
 

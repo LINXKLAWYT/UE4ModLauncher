@@ -3,11 +3,12 @@ import sys
 import json
 import time
 import shutil
+import tempfile
 import subprocess
 import threading
 from datetime import datetime
 
-from config import PROFILES_DIR, STATE_FILE
+from config import BASE_DIR, PROFILES_DIR, STATE_FILE
 
 try:
     import psutil
@@ -18,6 +19,7 @@ except ImportError:
     # extra check that catches launcher-stub .exe files spawning the real
     # game and exiting early. `pip install psutil` to enable it.
     HAS_PSUTIL = False
+
 
 class ModLogic:
 
@@ -51,6 +53,65 @@ class ModLogic:
         prof_dir = os.path.join(PROFILES_DIR, profile_name)
         if os.path.exists(prof_dir):
             shutil.rmtree(prof_dir, ignore_errors=True)
+
+    @staticmethod
+    def reset_appdata_keep_mods():
+        """
+        "Factory reset" of the AppData folder: wipes BASE_DIR (Profiles/,
+        launcher_settings.json, launcher_state.json) and recreates it from
+        scratch, but keeps every profile's mods. Only the Mods/ folder of
+        each profile is preserved - not profile_config.json, not the
+        settings file, not the crash-recovery state - so paths, language
+        and the UUU toggle all go back to their defaults, but nobody's
+        collected .pak files are thrown away.
+
+        Returns {"success": bool, "profiles": [names restored], "error": str|None}
+        """
+        result = {"success": False, "profiles": [], "error": None}
+        tmp_dir = None
+
+        try:
+            # 1. Back up every profile's Mods/ folder (only the folder
+            #    itself - not profile_config.json) to a temp location.
+            tmp_dir = tempfile.mkdtemp(prefix="UE4ModLauncher_backup_")
+            profiles = ModLogic.get_profiles()
+            for name in profiles:
+                mods_dir = ModLogic.get_profile_paths(name)["mods_dir"]
+                if os.path.isdir(mods_dir):
+                    shutil.copytree(mods_dir, os.path.join(tmp_dir, name))
+
+            # 2. Wipe the whole AppData folder for this app.
+            if os.path.exists(BASE_DIR):
+                shutil.rmtree(BASE_DIR)
+
+            # 3. Recreate it from scratch.
+            os.makedirs(PROFILES_DIR, exist_ok=True)
+
+            # 4. Recreate each profile with a fresh/empty config, and
+            #    restore its mods from the backup.
+            for name in profiles:
+                prof_dir = os.path.join(PROFILES_DIR, name)
+                mods_dir = os.path.join(prof_dir, "Mods")
+                os.makedirs(mods_dir, exist_ok=True)
+                with open(os.path.join(prof_dir, "profile_config.json"), 'w', encoding='utf-8') as f:
+                    json.dump({"exe_path": "", "paks_path": ""}, f, indent=4)
+
+                backup_mods_dir = os.path.join(tmp_dir, name)
+                if os.path.isdir(backup_mods_dir):
+                    for fname in os.listdir(backup_mods_dir):
+                        if fname.endswith('.pak'):
+                            shutil.move(os.path.join(backup_mods_dir, fname), os.path.join(mods_dir, fname))
+
+                result["profiles"].append(name)
+
+            result["success"] = True
+        except OSError as e:
+            result["error"] = str(e)
+        finally:
+            if tmp_dir and os.path.exists(tmp_dir):
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+
+        return result
 
     @staticmethod
     def open_profile_folder(profile_name):
@@ -144,6 +205,44 @@ class ModLogic:
                 failed.append((file, str(e)))
 
         return moved, failed
+
+    @staticmethod
+    def _move_selected_mods(source, destination, selected_files):
+        """Move only explicitly selected .pak files, leaving other mods stored."""
+        moved, failed = [], []
+        try:
+            os.makedirs(destination, exist_ok=True)
+        except OSError as e:
+            return moved, [(destination, str(e))]
+        for filename in selected_files:
+            if not isinstance(filename, str) or not filename.lower().endswith('.pak'):
+                continue
+            src_path = os.path.join(source, filename)
+            dst_path = os.path.join(destination, filename)
+            if not os.path.isfile(src_path):
+                continue
+            try:
+                if os.path.exists(dst_path):
+                    os.remove(dst_path)
+                shutil.move(src_path, dst_path)
+                moved.append(filename)
+            except OSError as e:
+                failed.append((filename, str(e)))
+        return moved, failed
+
+    @staticmethod
+    def _move_selected_mods_with_retry(source, destination, selected_files, attempts=3, delay=1.5):
+        moved_total, failed_total = [], []
+        remaining = list(selected_files)
+        for attempt in range(attempts):
+            moved, failed = ModLogic._move_selected_mods(source, destination, remaining)
+            moved_total.extend(moved)
+            failed_total = failed
+            if not failed or attempt == attempts - 1:
+                break
+            remaining = [name for name, _ in failed]
+            time.sleep(delay)
+        return moved_total, failed_total
 
     @staticmethod
     def _move_mods_with_retry(source, destination, attempts=3, delay=1.5):
@@ -360,8 +459,14 @@ class ModLogic:
 
         game_mods_folder = os.path.join(paks_path, "~mods")
 
-        # 1. Move mods into the game folder
-        moved_in, failed_in = ModLogic._move_mods_with_retry(mods_dir, game_mods_folder, attempts=2, delay=1.0)
+        # Deploy only the mods selected in the launcher. Older profiles without
+        # selected_mods retain the previous behaviour (all mods enabled).
+        selected_mods = cfg.get("selected_mods")
+        if selected_mods is None:
+            selected_mods = [f for f in os.listdir(mods_dir) if f.lower().endswith('.pak')] if os.path.isdir(mods_dir) else []
+        moved_in, failed_in = ModLogic._move_selected_mods_with_retry(
+            mods_dir, game_mods_folder, selected_mods, attempts=2, delay=1.0
+        )
         result["moved_in"], result["failed_in"] = moved_in, failed_in
 
         if moved_in:

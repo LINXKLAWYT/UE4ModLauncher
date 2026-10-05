@@ -10,6 +10,7 @@ import urllib.request
 
 from config import APP_VERSION, LATEST_RELEASE_API, RELEASES_URL
 
+
 def _version_string(text):
     """
     Pulls the version number out of a release tag, ignoring digits that are

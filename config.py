@@ -9,10 +9,14 @@ APP_NAME = "UE4ModLauncher"
 
 # Bump this on every release so it matches the tag you publish on GitHub
 # (e.g. tag "v1.2.0" -> APP_VERSION = "1.2.0"); the update check compares them.
-APP_VERSION = "1.2"
+APP_VERSION = "1.5.0"
 GITHUB_REPO = "LINXKLAWYT/UE4ModLauncher"
 RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
 LATEST_RELEASE_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+# GitHub Pages site (docs/ folder on the main branch). The help/support
+# page now lives under /help/ - the site root is the marketing page.
+# Update this if the GitHub username or repo name ever changes.
+HELP_URL = "https://linxklawyt.github.io/UE4ModLauncher/help.html"
 
 
 def get_base_dir():
@@ -148,13 +152,38 @@ LANG = {
         "invalid_profile_name": "That name isn't valid for a folder. Please use a different profile name.",
         "btn_open_folder": "📂 Open",
         "btn_add_mods": "➕ Add mods",
+        "btn_refresh_mods": "🔄 Refresh mods",
+        "mods_selection_hint": "Select the mods you want to activate when launching the game.",
         "err_no_profile": "Create a profile first with the '➕ New' button.",
         "err_open_folder": "Could not open the folder.",
         "err_copy_mods": "Could not copy the following file(s):\n{files}",
         "update_title": "Update available",
         "update_msg": "A new version is available: {latest} (you have {current}).\n\nOpen the download page on GitHub?",
+        "btn_create": "Create",
+        "btn_cancel": "Cancel",
+        "btn_yes": "Yes",
+        "btn_no": "No",
+        "btn_back": "← Back",
+        "btn_download": "Download",
+        "btn_later": "Later",
+        "btn_delete_confirm": "Delete",
+        "new_prof_placeholder": "Profile name",
+        "err_title": "Error",
+        "profile_created": "Profile '{name}' created.",
+        "profile_deleted": "Profile '{name}' deleted.",
+        "update_msg_short": "New version available: {latest} (you have {current}).",
+        "version_label": "Version {version}",
         "app_settings_title": "Settings",
         "no_profile_panel_hint": "No profile selected",
+        "reset_section_title": "Reset app data",
+        "reset_section_hint": "Deletes all settings and profile configuration (exe/paks paths, language) and recreates everything from scratch. Each profile's mods are kept.",
+        "btn_reset_appdata": "🗑 Reset app data",
+        "confirm_reset_title": "Reset app data?",
+        "confirm_reset_msg": "This deletes all settings and profile configuration and recreates them from scratch. Each profile's mods will be kept. This cannot be undone.",
+        "btn_reset_confirm": "Reset",
+        "reset_failed": "Could not reset app data.\n\n{error}",
+        "reset_done": "App data reset. {count} profile(s) kept their mods.",
+        "btn_help": "❓ Help",
     },
     "es": {
         "title": "Lanzador de mods en UE4",
@@ -193,13 +222,38 @@ LANG = {
         "invalid_profile_name": "Ese nombre no es válido para una carpeta. Usa otro nombre de perfil.",
         "btn_open_folder": "📂 Abrir",
         "btn_add_mods": "➕ Añadir mods",
+        "btn_refresh_mods": "🔄 Recargar mods",
+        "mods_selection_hint": "Marca los mods que quieras activar al jugar.",
         "err_no_profile": "Crea un perfil primero con el botón '➕ Nuevo'.",
         "err_open_folder": "No se pudo abrir la carpeta.",
         "err_copy_mods": "No se pudieron copiar estos archivos:\n{files}",
         "update_title": "Actualización disponible",
         "update_msg": "Hay una nueva versión disponible: {latest} (tienes la {current}).\n\n¿Abrir la página de descargas en GitHub?",
+        "btn_create": "Crear",
+        "btn_cancel": "Cancelar",
+        "btn_yes": "Sí",
+        "btn_no": "No",
+        "btn_back": "← Volver",
+        "btn_download": "Descargar",
+        "btn_later": "Más tarde",
+        "btn_delete_confirm": "Eliminar",
+        "new_prof_placeholder": "Nombre del perfil",
+        "err_title": "Error",
+        "profile_created": "Perfil '{name}' creado.",
+        "profile_deleted": "Perfil '{name}' eliminado.",
+        "update_msg_short": "Nueva versión disponible: {latest} (tienes la {current}).",
+        "version_label": "Versión {version}",
         "app_settings_title": "Ajustes",
         "no_profile_panel_hint": "Ningún perfil seleccionado",
+        "reset_section_title": "Restaurar datos de la app",
+        "reset_section_hint": "Elimina todos los ajustes y la configuración de los perfiles (rutas de exe/paks, idioma) y lo recrea todo desde cero. Los mods de cada perfil se conservan.",
+        "btn_reset_appdata": "🗑 Restaurar datos de la app",
+        "confirm_reset_title": "¿Restaurar datos de la app?",
+        "confirm_reset_msg": "Esto elimina todos los ajustes y la configuración de los perfiles y lo recrea todo desde cero. Los mods de cada perfil se conservarán. Esta acción no se puede deshacer.",
+        "btn_reset_confirm": "Restaurar",
+        "reset_failed": "No se pudieron restaurar los datos de la app.\n\n{error}",
+        "reset_done": "Datos de la app restaurados. {count} perfil(es) conservaron sus mods.",
+        "btn_help": "❓ Ayuda",
     }
 }
 
