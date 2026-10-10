@@ -12,7 +12,7 @@ import threading
 import customtkinter as ctk
 from tkinter import filedialog
 
-from config import PROFILES_DIR
+import config
 from core import ModLogic
 
 INVALID_NAME_CHARS = re.compile(r'[\\/:*?"<>|]')
@@ -129,14 +129,18 @@ class HomeView(ctk.CTkFrame):
         self.btn_browse_paks.pack(anchor="e", padx=15)
 
         self.chk_uuu_var = ctk.BooleanVar(value=False)
-        self.chk_uuu = ctk.CTkCheckBox(self.right_frame, text=self.t("cfg_uuu"), variable=self.chk_uuu_var)
+        self.chk_uuu = ctk.CTkCheckBox(self.right_frame, text=self.t("cfg_uuu"), variable=self.chk_uuu_var,
+                                       command=self._update_uuu_visibility)
         self.chk_uuu.pack(anchor="w", padx=15, pady=(20, 0))
 
-        self.lbl_cfg_uuu_dll = ctk.CTkLabel(self.right_frame, text=self.t("cfg_uuu_dll"))
+        # Ajustes del UUU: solo se muestran con el UUU activado. Los widgets
+        # existen siempre, así la ruta guardada se conserva aunque esté oculto.
+        self.uuu_frame = ctk.CTkFrame(self.right_frame, fg_color="transparent")
+        self.lbl_cfg_uuu_dll = ctk.CTkLabel(self.uuu_frame, text=self.t("cfg_uuu_dll"))
         self.lbl_cfg_uuu_dll.pack(anchor="w", padx=15, pady=(10, 0))
-        self.ent_uuu_dll = ctk.CTkEntry(self.right_frame)
+        self.ent_uuu_dll = ctk.CTkEntry(self.uuu_frame)
         self.ent_uuu_dll.pack(fill="x", padx=15, pady=5)
-        self.btn_browse_uuu_dll = ctk.CTkButton(self.right_frame, text=self.t("btn_browse"), command=lambda: self.browse_dll(self.ent_uuu_dll))
+        self.btn_browse_uuu_dll = ctk.CTkButton(self.uuu_frame, text=self.t("btn_browse"), command=lambda: self.browse_dll(self.ent_uuu_dll))
         self.btn_browse_uuu_dll.pack(anchor="e", padx=15)
 
         self.btn_save = ctk.CTkButton(self.right_frame, text=self.t("btn_save"), command=self.save_profile_data, fg_color="#0078D7")
@@ -186,7 +190,7 @@ class HomeView(ctk.CTkFrame):
         # o cuando el usuario pulsa "Recargar mods". No hay polling automático.
 
         prof = self.combo_profiles.get()
-        mods_dir = os.path.join(PROFILES_DIR, prof, "Mods") if prof != "---" else ""
+        mods_dir = os.path.join(config.PROFILES_DIR, prof, "Mods") if prof != "---" else ""
         try:
             mods = sorted(f for f in os.listdir(mods_dir) if f.lower().endswith('.pak')) if os.path.isdir(mods_dir) else []
         except OSError:
@@ -196,7 +200,7 @@ class HomeView(ctk.CTkFrame):
         # sin selección guardada, todos los mods quedan activados por defecto.
         selected = None
         if prof != "---":
-            cfg_file = os.path.join(PROFILES_DIR, prof, "profile_config.json")
+            cfg_file = os.path.join(config.PROFILES_DIR, prof, "profile_config.json")
             try:
                 with open(cfg_file, 'r', encoding='utf-8') as f:
                     profile_cfg = json.load(f)
@@ -226,7 +230,7 @@ class HomeView(ctk.CTkFrame):
         prof = self.combo_profiles.get()
         if prof == "---":
             return
-        cfg_file = os.path.join(PROFILES_DIR, prof, "profile_config.json")
+        cfg_file = os.path.join(config.PROFILES_DIR, prof, "profile_config.json")
         try:
             existing = {}
             if os.path.isfile(cfg_file):
@@ -274,6 +278,9 @@ class HomeView(ctk.CTkFrame):
     # ==================================================================
 
     def play_game(self):
+        if getattr(self.app, "migrating", False):
+            self.app.notify("info", self.t("loc_busy"), title=self.t("err_launch_title"))
+            return
         prof = self.combo_profiles.get()
         if prof == "---":
             self.app.notify("info", self.t("err_no_profile"), title=self.t("err_launch_title"))
@@ -350,7 +357,7 @@ class HomeView(ctk.CTkFrame):
             self.app.notify("error", self.t("invalid_profile_name"), title=self.t("err_title"))
             return
 
-        prof_path = os.path.join(PROFILES_DIR, name)
+        prof_path = os.path.join(config.PROFILES_DIR, name)
         if os.path.exists(prof_path):
             self.app.notify("error", self.t("err_exists"), title=self.t("err_title"))
             return
@@ -397,15 +404,24 @@ class HomeView(ctk.CTkFrame):
         self.load_mods_list()
         self.app.notify("success", self.t("profile_deleted", name=prof))
 
+    def _update_uuu_visibility(self):
+        """Muestra el panel de configuración del UUU solo si está activado."""
+        if self.chk_uuu_var.get():
+            if not self.uuu_frame.winfo_ismapped():
+                self.uuu_frame.pack(fill="x", after=self.chk_uuu)
+        else:
+            self.uuu_frame.pack_forget()
+
     def load_profile_data(self, profile_name):
         for ent in (self.ent_exe, self.ent_paks, self.ent_uuu_dll):
             ent.delete(0, 'end')
         self.chk_uuu_var.set(False)
 
         if profile_name == "---":
+            self._update_uuu_visibility()
             return
 
-        cfg_file = os.path.join(PROFILES_DIR, profile_name, "profile_config.json")
+        cfg_file = os.path.join(config.PROFILES_DIR, profile_name, "profile_config.json")
         if os.path.exists(cfg_file):
             try:
                 with open(cfg_file, 'r', encoding='utf-8') as f:
@@ -416,6 +432,7 @@ class HomeView(ctk.CTkFrame):
                 self.chk_uuu_var.set(bool(cfg.get("use_uuu", False)))
             except (OSError, json.JSONDecodeError):
                 pass
+        self._update_uuu_visibility()
 
     def save_profile_data(self):
         prof = self.combo_profiles.get()
@@ -456,7 +473,7 @@ class HomeView(ctk.CTkFrame):
         """
         if not profile_name or profile_name == "---":
             return
-        prof_dir = os.path.join(PROFILES_DIR, profile_name)
+        prof_dir = os.path.join(config.PROFILES_DIR, profile_name)
         if not os.path.isdir(prof_dir):
             return  # el perfil se eliminó desde que se seleccionó
         cfg_file = os.path.join(prof_dir, "profile_config.json")

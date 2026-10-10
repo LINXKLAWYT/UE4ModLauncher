@@ -11,6 +11,7 @@ import customtkinter as ctk
 from PIL import Image
 
 import updater
+import config
 from config import ConfigManager, LOGO_PNG, ICON_ICO, APP_VERSION, HELP_URL
 from core import ModLogic
 from ui.banner import NotificationBar
@@ -29,6 +30,8 @@ class ModLauncher(ctk.CTk):
         self.cfg = ConfigManager()
 
         self._update_queue = queue.Queue()  # hilo de actualizaciones -> hilo principal
+        self._migration_queue = queue.Queue()  # hilo de migración -> hilo principal
+        self.migrating = False              # True mientras se migran los perfiles
         self._current_view = "home"
 
         self.title(self.cfg.get_text("title"))
@@ -52,6 +55,8 @@ class ModLauncher(ctk.CTk):
         # Si el launcher se cerró a la fuerza con mods desplegados en la
         # carpeta del juego, recuperarlos ahora.
         self.after(300, self._check_recovery)
+        # Avisar si la carpeta de datos personalizada no está disponible.
+        self.after(600, self._check_location)
         # Buscar versión nueva en GitHub (hilo aparte, nunca bloquea la UI).
         self.after(1200, self._start_update_check)
 
@@ -102,6 +107,7 @@ class ModLauncher(ctk.CTk):
         self.settings_view.pack_forget()
         if name == "settings":
             self.home.persist()  # guardar lo escrito antes de salir de Inicio
+            self.settings_view.refresh_location()
             self.settings_view.pack(fill="both", expand=True)
         else:
             self.home.pack(fill="both", expand=True)
@@ -118,8 +124,8 @@ class ModLauncher(ctk.CTk):
     # Avisos y confirmaciones (en lugar de cuadros emergentes)
     # ==================================================================
 
-    def notify(self, kind, text, title="", actions=None, sticky=False):
-        self.banner.push(kind, text, title=title, actions=actions, sticky=sticky)
+    def notify(self, kind, text, title="", actions=None, sticky=False, key=None):
+        self.banner.push(kind, text, title=title, actions=actions, sticky=sticky, key=key)
 
     def confirm(self, text, on_yes, title="", yes_label=None, no_label=None):
         t = self.cfg.get_text
@@ -144,6 +150,72 @@ class ModLauncher(ctk.CTk):
         elif recovery["failed"]:
             self.notify("warning", t("recovery_failed_msg", profile=recovery.get("profile", "")),
                         title=t("recovered_title"))
+
+    def _check_location(self):
+        if config.LOCATION_PROBLEM:
+            self.notify("warning", self.cfg.get_text("loc_missing", path=config.LOCATION_PROBLEM),
+                        title=self.cfg.get_text("loc_title"), sticky=True)
+
+    # ==================================================================
+    # Migrar los perfiles a otra ubicación
+    # ==================================================================
+
+    def migrate_profiles(self, new_root):
+        if self.migrating:
+            return
+        self.home.persist()  # no perder lo escrito en los campos del perfil
+        self.migrating = True
+        self.notify("info", self.cfg.get_text("loc_busy"), sticky=True, key="migration")
+        threading.Thread(target=self._migration_worker, args=(new_root,), daemon=True).start()
+        self.after(300, self._poll_migration)
+
+    def _migration_worker(self, new_root):
+        try:
+            result = ModLogic.migrate_profiles(new_root)
+        except Exception as e:  # nunca dejar la app esperando para siempre
+            result = {"success": False, "error": "unexpected", "detail": str(e),
+                      "root": new_root, "profiles": 0}
+        self._migration_queue.put(result)
+
+    def _poll_migration(self):
+        try:
+            result = self._migration_queue.get_nowait()
+        except queue.Empty:
+            self.after(300, self._poll_migration)
+            return
+        self.migrating = False
+        self._on_migration_done(result)
+
+    def _on_migration_done(self, result):
+        t = self.cfg.get_text
+        self.banner.resolve("migration")  # quitar el "migrando…"
+        err = result.get("error")
+        if err:
+            msgs = {
+                "unexpected": t("loc_err_unexpected", detail=result.get("detail", "")),
+                "same_location": t("loc_err_same"),
+                "nested": t("loc_err_nested"),
+                "pending_state": t("loc_err_pending"),
+                "not_writable": t("loc_err_writable", detail=result.get("detail", "")),
+                "target_not_empty": t("loc_err_notempty", path=os.path.join(result["root"], "Profiles")),
+                "copy_failed": t("loc_err_copy", detail=result.get("detail", "")),
+                "verify_failed": t("loc_err_verify"),
+                "pointer_failed": t("loc_err_pointer"),
+            }
+            self.notify("error", msgs.get(err, err), title=t("err_title"), sticky=True)
+            return
+
+        # Las rutas ya apuntan a la nueva carpeta: volver a leer perfiles y mods.
+        self.home.update_profile_dropdown()
+        self.home.load_mods_list()
+        self.settings_view.ent_loc.delete(0, "end")
+        self.settings_view.refresh_location()
+        path = os.path.join(result["root"], "Profiles")
+        if result.get("leftover"):
+            self.notify("warning", t("loc_done_leftover", path=path), sticky=True)
+        else:
+            self.notify("success", t("loc_done", path=path, count=result["profiles"]),
+                        title=t("loc_done_title"), sticky=True)
 
     # ==================================================================
     # Buscar actualizaciones
@@ -181,14 +253,18 @@ class ModLauncher(ctk.CTk):
 
     def reset_app_data(self):
         self.home.persist()  # por si había cambios en curso, antes de borrarlo todo
-        self.notify("info", self.cfg.get_text("reset_section_title"), sticky=True)
+        self.notify("info", self.cfg.get_text("reset_section_title"), sticky=True, key="reset")
         threading.Thread(target=self._reset_worker, daemon=True).start()
 
     def _reset_worker(self):
-        result = ModLogic.reset_appdata_keep_mods()
+        try:
+            result = ModLogic.reset_appdata_keep_mods()
+        except Exception as e:
+            result = {"success": False, "error": str(e), "profiles": []}
         self.after(0, lambda: self._on_reset_done(result))
 
     def _on_reset_done(self, result):
+        self.banner.resolve("reset")
         if not result["success"]:
             self.notify(
                 "error",
@@ -212,7 +288,7 @@ class ModLauncher(ctk.CTk):
         self.home.apply_language()
         self.settings_view.apply_language()
 
-        self.notify("success", self.cfg.get_text("reset_done", count=len(result["profiles"])))
+        self.notify("success", self.cfg.get_text("reset_done", count=len(result["profiles"])), sticky=True)
 
     # ==================================================================
     # Idioma y cierre

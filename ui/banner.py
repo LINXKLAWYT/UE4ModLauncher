@@ -52,15 +52,17 @@ class NotificationBar(ctk.CTkFrame):
 
     # ------------------------------------------------------------------
 
-    def push(self, kind, text, title="", actions=None, sticky=False):
+    def push(self, kind, text, title="", actions=None, sticky=False, key=None):
         """
         kind:    "info" | "success" | "warning" | "error" | "question"
         actions: lista de (texto_botón, callback_o_None). Al pulsar uno se
                  cierra el aviso y luego se ejecuta su callback.
         sticky:  True = no se quita solo aunque sea info/success.
+        key:     etiqueta opcional para poder retirar el aviso después con
+                 resolve(key) (p. ej. el "migrando…" cuando termina).
         """
         item = {"kind": kind, "text": text, "title": title,
-                "actions": actions or [], "sticky": sticky}
+                "actions": actions or [], "sticky": sticky, "key": key}
         cur = self._current
         replaceable = (cur is not None and cur["kind"] in AUTO_DISMISS_MS
                        and not cur["sticky"] and not cur["actions"])
@@ -68,6 +70,14 @@ class NotificationBar(ctk.CTkFrame):
             self._show(item)
         else:
             self._queue.append(item)
+
+    def resolve(self, key):
+        """Retira el aviso con esa clave (esté mostrándose o en cola)."""
+        if key is None:
+            return
+        self._queue = [i for i in self._queue if i.get("key") != key]
+        if self._current is not None and self._current.get("key") == key:
+            self.dismiss()
 
     def dismiss(self):
         self._cancel_timer()

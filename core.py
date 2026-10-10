@@ -8,7 +8,8 @@ import subprocess
 import threading
 from datetime import datetime
 
-from config import BASE_DIR, PROFILES_DIR, STATE_FILE
+import config
+from config import APP_NAME, BASE_DIR
 
 try:
     import psutil
@@ -27,21 +28,21 @@ class ModLogic:
 
     @staticmethod
     def ensure_directories():
-        if not os.path.exists(PROFILES_DIR):
-            os.makedirs(PROFILES_DIR, exist_ok=True)
+        if not os.path.exists(config.PROFILES_DIR):
+            os.makedirs(config.PROFILES_DIR, exist_ok=True)
 
     @staticmethod
     def get_profiles():
-        if not os.path.exists(PROFILES_DIR):
+        if not os.path.exists(config.PROFILES_DIR):
             return []
         return sorted(
-            d for d in os.listdir(PROFILES_DIR)
-            if os.path.isdir(os.path.join(PROFILES_DIR, d))
+            d for d in os.listdir(config.PROFILES_DIR)
+            if os.path.isdir(os.path.join(config.PROFILES_DIR, d))
         )
 
     @staticmethod
     def get_profile_paths(profile_name):
-        prof_dir = os.path.join(PROFILES_DIR, profile_name)
+        prof_dir = os.path.join(config.PROFILES_DIR, profile_name)
         return {
             "prof_dir": prof_dir,
             "cfg_file": os.path.join(prof_dir, "profile_config.json"),
@@ -50,7 +51,7 @@ class ModLogic:
 
     @staticmethod
     def delete_profile(profile_name):
-        prof_dir = os.path.join(PROFILES_DIR, profile_name)
+        prof_dir = os.path.join(config.PROFILES_DIR, profile_name)
         if os.path.exists(prof_dir):
             shutil.rmtree(prof_dir, ignore_errors=True)
 
@@ -80,17 +81,29 @@ class ModLogic:
                 if os.path.isdir(mods_dir):
                     shutil.copytree(mods_dir, os.path.join(tmp_dir, name))
 
-            # 2. Wipe the whole AppData folder for this app.
+            # 2. Wipe the whole AppData folder for this app. If the profiles
+            #    were migrated to another location, that UE4ModLauncher
+            #    folder is wiped too (its mods are already in the backup),
+            #    and the location itself is kept.
+            custom_root = config.DATA_DIR
+            keep_pointer = config.read_location_pointer()
             if os.path.exists(BASE_DIR):
                 shutil.rmtree(BASE_DIR)
+            if (os.path.normcase(os.path.abspath(custom_root)) != os.path.normcase(BASE_DIR)
+                    and os.path.basename(custom_root.rstrip("\\/")).lower() == APP_NAME.lower()
+                    and os.path.isdir(custom_root)):
+                shutil.rmtree(custom_root)
 
             # 3. Recreate it from scratch.
-            os.makedirs(PROFILES_DIR, exist_ok=True)
+            os.makedirs(BASE_DIR, exist_ok=True)
+            if keep_pointer:
+                config.write_location_pointer(keep_pointer)
+            os.makedirs(config.PROFILES_DIR, exist_ok=True)
 
             # 4. Recreate each profile with a fresh/empty config, and
             #    restore its mods from the backup.
             for name in profiles:
-                prof_dir = os.path.join(PROFILES_DIR, name)
+                prof_dir = os.path.join(config.PROFILES_DIR, name)
                 mods_dir = os.path.join(prof_dir, "Mods")
                 os.makedirs(mods_dir, exist_ok=True)
                 with open(os.path.join(prof_dir, "profile_config.json"), 'w', encoding='utf-8') as f:
@@ -164,6 +177,136 @@ class ModLogic:
                 failed.append((name, str(e)))
 
         return added, failed
+
+    # ---------------- data location (migrate profiles) ----------------
+
+    @staticmethod
+    def _norm(path):
+        return os.path.normcase(os.path.abspath(path))
+
+    @staticmethod
+    def _is_inside(child, parent):
+        c, p = ModLogic._norm(child), ModLogic._norm(parent)
+        return c == p or c.startswith(p.rstrip("\\/") + os.sep)
+
+    @staticmethod
+    def _tree_signature(root):
+        """Every folder and file (relative path, size) under `root`."""
+        sig = []
+        for dirpath, dirnames, filenames in os.walk(root):
+            rel = os.path.relpath(dirpath, root)
+            sig.append((rel, -1))
+            for fn in filenames:
+                try:
+                    size = os.path.getsize(os.path.join(dirpath, fn))
+                except OSError:
+                    size = -2
+                sig.append((os.path.join(rel, fn), size))
+        return sorted(sig)
+
+    @staticmethod
+    def migrate_profiles(new_root):
+        """
+        Moves Profiles/ (with every profile's Mods and config) to
+        <new_root>/Profiles and makes that the data location. `new_root` is
+        the final UE4ModLauncher folder (see config.location_root_for);
+        passing BASE_DIR goes back to the AppData default.
+
+        Copy -> verify -> switch -> delete: the old data is only removed
+        once the copy has been checked and the new location saved, so a
+        failure at any step leaves everything exactly as it was.
+
+        Returns {"success", "error", "detail", "root", "profiles", "leftover"}.
+        error: same_location, nested, pending_state, not_writable,
+        target_not_empty, copy_failed, verify_failed, pointer_failed.
+        """
+        result = {"success": False, "error": None, "detail": "",
+                  "root": new_root, "profiles": 0, "leftover": False}
+        old_root = config.DATA_DIR
+        old_profiles = config.PROFILES_DIR
+        new_root = os.path.abspath(new_root)
+        new_profiles = os.path.join(new_root, "Profiles")
+        result["root"] = new_root
+
+        if ModLogic._norm(new_root) == ModLogic._norm(old_root):
+            result["error"] = "same_location"
+            return result
+        if (ModLogic._is_inside(new_root, old_profiles)
+                or ModLogic._is_inside(old_profiles, new_root)):
+            result["error"] = "nested"
+            return result
+        # Mods deployed in a game folder from an unfinished session: let
+        # crash recovery put them back first.
+        if os.path.exists(config.STATE_FILE):
+            result["error"] = "pending_state"
+            return result
+
+        root_existed = os.path.isdir(new_root)
+        profiles_existed = os.path.isdir(new_profiles)
+        if profiles_existed and os.listdir(new_profiles):
+            result["error"] = "target_not_empty"
+            return result
+
+        def cleanup():
+            # Remove only what this attempt created.
+            if not profiles_existed:
+                shutil.rmtree(new_profiles, ignore_errors=True)
+            if not root_existed:
+                try:
+                    os.rmdir(new_root)
+                except OSError:
+                    pass
+
+        # Can we write there?
+        try:
+            os.makedirs(new_root, exist_ok=True)
+            probe = os.path.join(new_root, ".write_test")
+            with open(probe, 'w') as f:
+                f.write("x")
+            os.remove(probe)
+        except OSError as e:
+            cleanup()
+            result["error"], result["detail"] = "not_writable", str(e)
+            return result
+
+        # 1) copy
+        try:
+            if os.path.isdir(old_profiles):
+                shutil.copytree(old_profiles, new_profiles, dirs_exist_ok=True)
+            else:
+                os.makedirs(new_profiles, exist_ok=True)
+        except (OSError, shutil.Error) as e:
+            cleanup()
+            result["error"], result["detail"] = "copy_failed", str(e)
+            return result
+
+        # 2) verify
+        if os.path.isdir(old_profiles):
+            if ModLogic._tree_signature(old_profiles) != ModLogic._tree_signature(new_profiles):
+                cleanup()
+                result["error"] = "verify_failed"
+                return result
+
+        # 3) switch
+        if not config.write_location_pointer(new_root):
+            cleanup()
+            result["error"] = "pointer_failed"
+            return result
+        config.apply_data_dir(new_root)
+
+        # 4) delete the old copy
+        shutil.rmtree(old_profiles, ignore_errors=True)
+        result["leftover"] = os.path.exists(old_profiles)
+        if (ModLogic._norm(old_root) != ModLogic._norm(BASE_DIR)
+                and os.path.basename(old_root.rstrip("\\/")).lower() == APP_NAME.lower()):
+            try:
+                os.rmdir(old_root)   # only if it is now empty
+            except OSError:
+                pass
+
+        result["profiles"] = len(ModLogic.get_profiles())
+        result["success"] = True
+        return result
 
     # ---------------- mod moving (hardened) ----------------
 
@@ -294,7 +437,7 @@ class ModLogic:
     @staticmethod
     def _write_state(profile_name, mods_dir, game_mods_folder, files):
         try:
-            with open(STATE_FILE, 'w', encoding='utf-8') as f:
+            with open(config.STATE_FILE, 'w', encoding='utf-8') as f:
                 json.dump({
                     "profile": profile_name,
                     "mods_dir": mods_dir,
@@ -308,8 +451,8 @@ class ModLogic:
     @staticmethod
     def _clear_state():
         try:
-            if os.path.exists(STATE_FILE):
-                os.remove(STATE_FILE)
+            if os.path.exists(config.STATE_FILE):
+                os.remove(config.STATE_FILE)
         except OSError:
             pass
 
@@ -326,11 +469,11 @@ class ModLogic:
         Returns None if there was nothing to recover, otherwise a dict:
         {"profile": str, "recovered": [...], "failed": [...]}
         """
-        if not os.path.exists(STATE_FILE):
+        if not os.path.exists(config.STATE_FILE):
             return None
 
         try:
-            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+            with open(config.STATE_FILE, 'r', encoding='utf-8') as f:
                 state = json.load(f)
         except (OSError, json.JSONDecodeError):
             ModLogic._clear_state()

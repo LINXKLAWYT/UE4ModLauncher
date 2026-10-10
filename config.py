@@ -9,7 +9,7 @@ APP_NAME = "UE4ModLauncher"
 
 # Bump this on every release so it matches the tag you publish on GitHub
 # (e.g. tag "v1.2.0" -> APP_VERSION = "1.2.0"); the update check compares them.
-APP_VERSION = "1.5.0"
+APP_VERSION = "1.6.0"
 GITHUB_REPO = "LINXKLAWYT/UE4ModLauncher"
 RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
 LATEST_RELEASE_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
@@ -21,8 +21,8 @@ HELP_URL = "https://linxklawyt.github.io/UE4ModLauncher/help.html"
 
 def get_base_dir():
     """
-    Directory where Profiles/, the settings file and the crash-recovery
-    state file live: a per-user AppData folder, e.g.
+    Directory where the settings file lives (and, by default, Profiles/ and
+    the crash-recovery state file): a per-user AppData folder, e.g.
     C:\\Users\\<you>\\AppData\\Local\\UE4ModLauncher
 
     This is the standard place for a Windows app to keep its own data, and
@@ -56,9 +56,77 @@ def _get_legacy_base_dir():
 BASE_DIR = get_base_dir()
 os.makedirs(BASE_DIR, exist_ok=True)
 
-PROFILES_DIR = os.path.join(BASE_DIR, "Profiles")
+# Settings and the "where is my data" pointer always stay in AppData: the
+# app has to find them before it knows where the profiles are.
 MAIN_CONFIG_FILE = os.path.join(BASE_DIR, "launcher_settings.json")
-STATE_FILE = os.path.join(BASE_DIR, "launcher_state.json")
+LOCATION_FILE = os.path.join(BASE_DIR, "data_location.json")
+
+# Profiles/ and the crash-recovery state live in DATA_DIR: AppData by
+# default, or a folder named UE4ModLauncher somewhere else if the user
+# migrated them. Other modules must read these as `config.PROFILES_DIR` /
+# `config.STATE_FILE` (not `from config import ...`) so a migration takes
+# effect without restarting the app.
+DATA_DIR = BASE_DIR
+PROFILES_DIR = os.path.join(DATA_DIR, "Profiles")
+STATE_FILE = os.path.join(DATA_DIR, "launcher_state.json")
+LOCATION_PROBLEM = None   # custom folder that was configured but is unreachable
+
+
+def location_root_for(parent):
+    """Final data folder for a folder chosen by the user: <parent>/UE4ModLauncher,
+    unless the chosen folder is already called UE4ModLauncher."""
+    parent = os.path.abspath(parent)
+    if os.path.basename(parent.rstrip("\\/")).lower() == APP_NAME.lower():
+        return parent
+    return os.path.join(parent, APP_NAME)
+
+
+def apply_data_dir(root):
+    """Point the data paths at `root` (takes effect immediately)."""
+    global DATA_DIR, PROFILES_DIR, STATE_FILE
+    DATA_DIR = root
+    PROFILES_DIR = os.path.join(root, "Profiles")
+    STATE_FILE = os.path.join(root, "launcher_state.json")
+
+
+def read_location_pointer():
+    try:
+        with open(LOCATION_FILE, 'r', encoding='utf-8') as f:
+            path = json.load(f).get("path")
+        return path if isinstance(path, str) and path else None
+    except (OSError, ValueError, AttributeError):
+        return None
+
+
+def write_location_pointer(root):
+    """Remember a custom data folder; None goes back to the AppData default."""
+    if root is None or os.path.normcase(os.path.abspath(root)) == os.path.normcase(BASE_DIR):
+        try:
+            if os.path.exists(LOCATION_FILE):
+                os.remove(LOCATION_FILE)
+        except OSError:
+            return False
+        return True
+    try:
+        with open(LOCATION_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"path": os.path.abspath(root)}, f, indent=4)
+        return True
+    except OSError:
+        return False
+
+
+def _init_data_dir():
+    global LOCATION_PROBLEM
+    root = read_location_pointer()
+    if root and os.path.isdir(root):
+        apply_data_dir(root)
+    elif root:
+        # Drive unplugged / folder deleted: fall back to AppData for this
+        # session instead of crashing, and let the UI warn about it.
+        LOCATION_PROBLEM = root
+
+
+_init_data_dir()
 
 
 def _migrate_legacy_data():
@@ -173,6 +241,32 @@ LANG = {
         "profile_deleted": "Profile '{name}' deleted.",
         "update_msg_short": "New version available: {latest} (you have {current}).",
         "version_label": "Version {version}",
+        "loc_title": "Data location",
+        "loc_hint": "Profiles and their mods are kept in a folder named UE4ModLauncher. You can move it out of AppData to another folder or drive.",
+        "loc_current": "Current folder:",
+        "loc_default_tag": "(AppData, default)",
+        "loc_pick": "Move to this folder:",
+        "loc_preview": "Profiles will be stored in:\n{path}",
+        "btn_loc_migrate": "Migrate profiles",
+        "btn_loc_default": "Back to AppData",
+        "loc_confirm_title": "Migrate profiles?",
+        "loc_confirm_msg": "Profiles and their mods will be copied to:\n{path}\nand, once the copy is verified, removed from the current location.",
+        "btn_loc_confirm": "Migrate",
+        "loc_busy": "Migrating profiles… wait until it finishes.",
+        "loc_done_title": "Migration finished",
+        "loc_err_unexpected": "Unexpected error while migrating: {detail}",
+        "loc_done": "Profiles migrated to:\n{path}\n{count} profile(s) moved.",
+        "loc_done_leftover": "Profiles migrated to:\n{path}\nThe old folder could not be fully deleted (some files may be in use).",
+        "loc_err_invalid": "Choose an existing folder first.",
+        "loc_err_same": "That is already the current location.",
+        "loc_err_nested": "The new location can't be inside the current Profiles folder.",
+        "loc_err_pending": "Can't migrate now: mods from an unfinished session are still in the game folder. Restart the launcher so it can recover them, then try again.",
+        "loc_err_writable": "Can't write to that folder. Pick another one.\n{detail}",
+        "loc_err_notempty": "That location already contains profiles:\n{path}\nPick another folder or empty it first.",
+        "loc_err_copy": "The copy failed; nothing was changed.\n{detail}",
+        "loc_err_verify": "The copy could not be verified; nothing was changed.",
+        "loc_err_pointer": "The new location could not be saved; nothing was changed.",
+        "loc_missing": "The custom data folder is not available:\n{path}\nThe launcher is using AppData for now. Reconnect the drive and restart it to use that folder again.",
         "app_settings_title": "Settings",
         "no_profile_panel_hint": "No profile selected",
         "reset_section_title": "Reset app data",
@@ -243,6 +337,32 @@ LANG = {
         "profile_deleted": "Perfil '{name}' eliminado.",
         "update_msg_short": "Nueva versión disponible: {latest} (tienes la {current}).",
         "version_label": "Versión {version}",
+        "loc_title": "Ubicación de los datos",
+        "loc_hint": "Los perfiles y sus mods se guardan en una carpeta llamada UE4ModLauncher. Puedes sacarla de AppData y llevarla a otra carpeta o disco.",
+        "loc_current": "Carpeta actual:",
+        "loc_default_tag": "(AppData, por defecto)",
+        "loc_pick": "Mover a esta carpeta:",
+        "loc_preview": "Los perfiles se guardarán en:\n{path}",
+        "btn_loc_migrate": "Migrar perfiles",
+        "btn_loc_default": "Volver a AppData",
+        "loc_confirm_title": "¿Migrar los perfiles?",
+        "loc_confirm_msg": "Los perfiles y sus mods se copiarán a:\n{path}\ny, cuando la copia esté verificada, se quitarán de la ubicación actual.",
+        "btn_loc_confirm": "Migrar",
+        "loc_busy": "Migrando perfiles… espera a que termine.",
+        "loc_done_title": "Migración terminada",
+        "loc_err_unexpected": "Error inesperado al migrar: {detail}",
+        "loc_done": "Perfiles migrados a:\n{path}\n{count} perfil(es) movidos.",
+        "loc_done_leftover": "Perfiles migrados a:\n{path}\nNo se pudo borrar del todo la carpeta anterior (puede que haya archivos en uso).",
+        "loc_err_invalid": "Elige primero una carpeta que exista.",
+        "loc_err_same": "Esa ya es la ubicación actual.",
+        "loc_err_nested": "La nueva ubicación no puede estar dentro de la carpeta Profiles actual.",
+        "loc_err_pending": "No se puede migrar ahora: quedan mods de una sesión sin cerrar en la carpeta del juego. Reinicia el launcher para que los recupere y vuelve a intentarlo.",
+        "loc_err_writable": "No se puede escribir en esa carpeta. Elige otra.\n{detail}",
+        "loc_err_notempty": "Esa ubicación ya contiene perfiles:\n{path}\nElige otra carpeta o vacíala primero.",
+        "loc_err_copy": "La copia falló; no se cambió nada.\n{detail}",
+        "loc_err_verify": "No se pudo verificar la copia; no se cambió nada.",
+        "loc_err_pointer": "No se pudo guardar la nueva ubicación; no se cambió nada.",
+        "loc_missing": "La carpeta de datos personalizada no está disponible:\n{path}\nEl launcher usa AppData por ahora. Reconecta el disco y reinícialo para volver a usar esa carpeta.",
         "app_settings_title": "Ajustes",
         "no_profile_panel_hint": "Ningún perfil seleccionado",
         "reset_section_title": "Restaurar datos de la app",

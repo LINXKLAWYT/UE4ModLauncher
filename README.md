@@ -54,6 +54,27 @@ the UUU ZIP from there, extract it to a folder and select
 
 Do not download or redistribute the UUU binaries from unofficial mirrors.
 
+## Data location (migrate profiles)
+
+By default profiles, mods and the crash-recovery state live in
+`%LOCALAPPDATA%\UE4ModLauncher`. In **Settings → Data location** you can move
+them to another folder or drive:
+
+1. Click **Browse** (or type a path) and pick the folder where you want them.
+2. The launcher always creates a folder named `UE4ModLauncher` inside it, with
+   `Profiles` below that. For example, picking `D:\Games` stores everything in
+   `D:\Games\UE4ModLauncher\Profiles`.
+3. Click **Migrate profiles** and confirm. Profiles and their mods are copied,
+   the copy is verified, the new location is saved and only then is the old
+   folder removed. If anything fails, nothing is changed.
+
+**Back to AppData** returns them to the default folder. The launcher's settings
+file and the pointer to the chosen folder always stay in AppData, so if the
+custom folder is unavailable (for example an unplugged drive) the app starts
+with AppData and warns you. The migration is blocked while mods from an
+unfinished session are still in a game folder: restart the launcher so it
+recovers them first.
+
 ## Update check
 
 Every time the app starts it checks the latest release on GitHub in the
@@ -158,6 +179,27 @@ en todos los juegos.
 
 La opción se guarda junto con el perfil del juego, de modo que cada perfil
 puede tener su propia configuración.
+
+## Ubicación de los datos (migrar perfiles)
+
+Por defecto los perfiles, los mods y el estado de recuperación están en
+`%LOCALAPPDATA%\UE4ModLauncher`. En **Ajustes → Ubicación de los datos** puedes
+llevarlos a otra carpeta o disco:
+
+1. Pulsa **Buscar** (o escribe una ruta) y elige la carpeta donde los quieres.
+2. El launcher crea siempre dentro una carpeta llamada `UE4ModLauncher`, y
+   debajo `Profiles`. Por ejemplo, si eliges `D:\Juegos`, todo queda en
+   `D:\Juegos\UE4ModLauncher\Profiles`.
+3. Pulsa **Migrar perfiles** y confirma. Se copian los perfiles y sus mods, se
+   verifica la copia, se guarda la nueva ubicación y solo entonces se borra la
+   carpeta anterior. Si algo falla, no se cambia nada.
+
+**Volver a AppData** los devuelve a la carpeta por defecto. El archivo de
+ajustes del launcher y el puntero a la carpeta elegida se quedan siempre en
+AppData, así que si la carpeta personalizada no está disponible (por ejemplo,
+un disco desconectado) la app arranca con AppData y te avisa. La migración se
+bloquea mientras queden mods de una sesión sin cerrar en la carpeta de un juego:
+reinicia el launcher para que los recupere antes.
 
 ## Buscar actualizaciones
 
