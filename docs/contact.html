@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es" data-lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UE4 Mod Launcher · Contacto / Contact</title>
+<style>
+:root{
+  --bg:#eef1f5; --card:#ffffff; --ink:#1b2330; --muted:#54607a; --line:#d3dae5;
+  --accent:#c17f1e; --accent-ink:#ffffff; --code-bg:#e6ebf3; --warn:#fff3d6; --warn-line:#e3b341; --warn-ink:#5a4200;
+  --content-max:1120px; --err:#b3261e; --ok:#1b6e3a; --ok-bg:#e3f4e8; --err-bg:#fde8e6;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --err:#ff8a80; --ok:#7fd99a; --ok-bg:#12261a; --err-bg:#2d1513;
+    --bg:#0b0d11; --card:#141821; --ink:#eef1f6; --muted:#8d96a8; --line:#252c38;
+    --accent:#e8a33d; --accent-ink:#1a1206; --code-bg:#1a212c; --warn:#2c2513; --warn-line:#a67c1a; --warn-ink:#f1d488;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+[data-lang="es"] [lang="en"], [data-lang="en"] [lang="es"]{display:none}
+
+/* ---------- top bar ---------- */
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar-in{max-width:var(--content-max);margin:0 auto;padding:14px 20px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.brand{font-family:Consolas,"Cascadia Mono",ui-monospace,monospace;font-weight:700;letter-spacing:.2px;text-decoration:none;font-size:15px;color:var(--ink)}
+.brand span{color:var(--accent)}
+nav.primary{display:none;gap:28px;align-items:center}
+nav.primary a{color:var(--muted);text-decoration:none;font-size:14.5px;padding:4px 0;border-bottom:2px solid transparent}
+nav.primary a:hover{color:var(--ink)}
+nav.primary a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+@media (min-width:860px){nav.primary{display:flex}}
+.tools{display:flex;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.seg button:focus-visible,.btn:focus-visible,.path:focus-visible,a:focus-visible,.navlink:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:700;padding:9px 16px;border-radius:8px;border:0;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.big{padding:13px 24px;font-size:17px}
+
+/* ---------- page shell: sidebar + content ---------- */
+.shell{max-width:var(--content-max);margin:0 auto;padding:0 20px;display:block}
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px;align-items:start}
+}
+
+.sidebar{display:none}
+@media (min-width:900px){
+  .sidebar{display:block;position:sticky;top:76px;padding:36px 0}
+}
+.sidebar-label{font-size:13px;color:var(--muted);margin:0 0 10px}
+.sidebar nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.sidebar nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:14.5px;border-left:2px solid transparent}
+.sidebar nav a:hover{color:var(--ink);background:var(--card)}
+.sidebar nav a.active{color:var(--accent);border-left-color:var(--accent);font-weight:600;background:var(--card)}
+
+/* mobile section jump list, replaces the sidebar under 900px */
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 36px;padding:0;list-style:none}
+.jump a{display:block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:var(--card)}
+.jump a:hover,.jump a.active{border-color:var(--accent);color:var(--accent)}
+@media (min-width:900px){.jump{display:none}}
+
+main{min-width:0;padding:36px 0 72px}
+h1{font-size:clamp(28px,4.2vw,40px);line-height:1.15;margin:0 0 12px}
+.lead{color:var(--muted);max-width:60ch;margin:0 0 20px}
+
+section{margin:0 0 56px;scroll-margin-top:84px}
+section + section{border-top:1px solid var(--line);padding-top:48px}
+h2{font-size:23px;margin:0 0 6px}
+h3{font-size:16.5px;margin:22px 0 6px}
+p{margin:0 0 12px;max-width:66ch}
+section>p.sub,div>p.sub{color:var(--muted)}
+ol,ul{margin:0 0 12px;padding-left:22px;max-width:66ch}
+li{margin:4px 0}
+code,.path{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--code-bg);padding:2px 6px;border-radius:5px;overflow-wrap:anywhere}
+.path{cursor:pointer;border:0;color:inherit;display:inline-block}
+.path.ok{outline:2px solid var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+.card>h3:first-child{margin-top:0}
+.note{background:var(--warn);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:10px;padding:12px 16px;margin:16px 0;max-width:66ch}
+.note p{margin:0}
+.cta{border-top:1px solid var(--line);padding-top:48px}
+main a:not(.btn):not(.navlink){color:var(--accent)}
+.wrap{max-width:var(--content-max);margin:0 auto;padding:0 20px}
+footer{padding:36px 0;color:var(--muted);font-size:13.5px}
+.mono{font-family:Consolas,"Cascadia Mono",ui-monospace,"SFMono-Regular",monospace}
+.foot-row{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;justify-content:space-between}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{color:var(--muted);text-decoration:none}
+.foot-links a:hover{color:var(--ink)}
+
+/* ---------- contact form ---------- */
+form.contact{display:grid;gap:18px;max-width:620px}
+.field label{display:block;font-weight:600;margin:0 0 6px}
+.field input,.field select,.field textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.field textarea{min-height:170px;resize:vertical}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.field [aria-invalid="true"]{border-color:var(--err)}
+.err{color:var(--err);font-size:14px;margin:6px 0 0}
+.count{color:var(--muted);font-size:13px;text-align:right;margin:4px 0 0}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.form-actions{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center}
+.status{border-radius:10px;padding:12px 16px;margin:0;max-width:66ch;border:1px solid var(--line);background:var(--card)}
+.status.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.status.bad{background:var(--err-bg);border-color:var(--err);color:var(--err)}
+.status a{color:inherit;text-decoration:underline}
+.small{color:var(--muted);font-size:14px;max-width:66ch}
+button.btn{font:inherit;font-weight:700}
+.btn[disabled]{opacity:.6;cursor:default;filter:none}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="index.html">UE4<span>Mod</span>Launcher</a>
+    <nav class="primary" aria-label="Principal">
+      <a href="index.html"><span lang="es">Inicio</span><span lang="en">Home</span></a>
+      <a href="download.html"><span lang="es">Descargas</span><span lang="en">Downloads</span></a>
+      <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="contact.html" class="active" aria-current="page"><span lang="es">Contacto</span><span lang="en">Contact</span></a>
+      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Idioma / Language">
+        <button type="button" data-set="es" aria-pressed="true">ES</button>
+        <button type="button" data-set="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn" href="download.html">
+        <span lang="es">Descargar</span><span lang="en">Download</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <p class="sidebar-label"><span lang="es">En esta página</span><span lang="en">On this page</span></p>
+    <nav aria-label="Secciones">
+      <ul>
+        <li><a class="navlink" href="#form"><span lang="es">Escríbenos</span><span lang="en">Write to us</span></a></li>
+        <li><a class="navlink" href="#other"><span lang="es">Otras formas de contacto</span><span lang="en">Other ways to reach us</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main>
+    <h1><span lang="es">Contacto</span><span lang="en">Contact</span></h1>
+    <p class="lead">
+      <span lang="es">Para cualquier cosa: una duda, un error, una sugerencia… Escribe tu mensaje y llegará directamente al correo del proyecto.</span>
+      <span lang="en">For anything at all: a question, a bug, a suggestion… Write your message and it will reach the project's mailbox directly.</span>
+    </p>
+    <ul class="jump">
+      <li><a class="navlink" href="#form"><span lang="es">Escríbenos</span><span lang="en">Write to us</span></a></li>
+      <li><a class="navlink" href="#other"><span lang="es">Otras formas de contacto</span><span lang="en">Other ways to reach us</span></a></li>
+    </ul>
+
+    <section id="form">
+      <h2><span lang="es">Escríbenos</span><span lang="en">Write to us</span></h2>
+      <form class="contact" id="contact-form" novalidate>
+        <div class="field">
+          <label for="name"><span lang="es">Nombre</span><span lang="en">Name</span></label>
+          <input id="name" name="name" type="text" maxlength="80" autocomplete="name" aria-describedby="name-err">
+          <p class="err" id="name-err" hidden></p>
+        </div>
+        <div class="field">
+          <label for="email"><span lang="es">Tu correo (para poder responderte)</span><span lang="en">Your email (so we can reply)</span></label>
+          <input id="email" name="email" type="email" maxlength="120" autocomplete="email" aria-describedby="email-err">
+          <p class="err" id="email-err" hidden></p>
+        </div>
+        <div class="field">
+          <label for="topic"><span lang="es">Motivo</span><span lang="en">Topic</span></label>
+          <select id="topic" name="topic">
+            <option value="question">Pregunta / Question</option>
+            <option value="bug">Error o problema / Bug or problem</option>
+            <option value="idea">Sugerencia / Suggestion</option>
+            <option value="other">Otro / Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message"><span lang="es">Mensaje</span><span lang="en">Message</span></label>
+          <textarea id="message" name="message" maxlength="3000" aria-describedby="message-err message-count"></textarea>
+          <p class="err" id="message-err" hidden></p>
+          <p class="count" id="message-count">0 / 3000</p>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label>Leave this field empty <input type="text" id="hp-field" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true"></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn big" id="send"><span lang="es">Enviar mensaje</span><span lang="en">Send message</span></button>
+        </div>
+        <div id="status" class="status" role="status" aria-live="polite" tabindex="-1" hidden></div>
+        <p class="small">
+          <span lang="es">Al enviarlo, tu mensaje y tu correo pasan por FormSubmit, un servicio externo que lo reenvía al correo del proyecto. No incluyas contraseñas ni datos sensibles.</span>
+          <span lang="en">When you send it, your message and email go through FormSubmit, an external service that forwards it to the project's mailbox. Don't include passwords or sensitive data.</span>
+        </p>
+      </form>
+    </section>
+
+    <section id="other">
+      <div lang="es">
+        <h2>Otras formas de contacto</h2>
+        <p>Si prefieres escribir desde tu aplicación de correo, el mensaje llega al mismo sitio:</p>
+        <p><a href="mailto:linxklawyt@hotmail.com">linxklawyt@hotmail.com</a></p>
+        <p>Antes de escribir por un problema con el programa, mira la <a href="help.html">guía de ayuda</a>: explica cómo encontrar el .exe, la carpeta Paks y cómo solucionar los bloqueos del antivirus.</p>
+      </div>
+      <div lang="en">
+        <h2>Other ways to reach us</h2>
+        <p>If you prefer to write from your own email app, the message goes to the same place:</p>
+        <p><a href="mailto:linxklawyt@hotmail.com">linxklawyt@hotmail.com</a></p>
+        <p>Before writing about a problem with the program, check the <a href="help.html">help guide</a>: it explains how to find the .exe, the Paks folder and how to fix antivirus blocks.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap foot-row">
+    <span class="mono">UE4ModLauncher</span>
+    <div class="foot-links">
+      <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="contact.html"><span lang="es">Contacto</span><span lang="en">Contact</span></a>
+      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
+      <a href="download.html"><span lang="es">Versiones</span><span lang="en">Releases</span></a>
+      <a href="https://github.com/LINXKLAWYT/UE4ModLauncher/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var TO = 'linxklawyt@hotmail.com';
+  var ENDPOINT = 'https://formsubmit.co/ajax/' + TO;
+
+  var root = document.documentElement;
+  var btns = document.querySelectorAll('.seg button');
+
+  function setLang(l) {
+    root.setAttribute('data-lang', l);
+    root.setAttribute('lang', l);
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+    document.title = l === 'es' ? 'UE4 Mod Launcher · Contacto' : 'UE4 Mod Launcher · Contact';
+  }
+
+  // ---------- idioma recordado entre páginas ----------
+  var LANG_KEY = 'ue4ml_lang';
+  function savedLang() {
+    try { var v = localStorage.getItem(LANG_KEY); return (v === 'es' || v === 'en') ? v : null; } catch (e) { return null; }
+  }
+  function urlLang() {
+    var m = /[?&]lang=(es|en)(?:&|$)/.exec(location.search);
+    return m ? m[1] : null;
+  }
+  function rememberLang(l) { try { localStorage.setItem(LANG_KEY, l); } catch (e) {} }
+  function tagLinks(l) {
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      var base = a.getAttribute('data-base') || a.getAttribute('href');
+      var m = /^((?:index|help|download|contact)\.html)(#.*)?$/.exec(base);
+      if (!m) return;
+      a.setAttribute('data-base', base);
+      a.setAttribute('href', m[1] + '?lang=' + l + (m[2] || ''));
+    });
+  }
+  function applyLang(l) { setLang(l); tagLinks(l); }
+
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () { rememberLang(b.dataset.set); applyLang(b.dataset.set); });
+  });
+  var firstLang = urlLang() || savedLang() || ((navigator.language || 'es').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+  applyLang(firstLang);
+  if (urlLang()) {
+    rememberLang(firstLang);
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+  }
+  window.addEventListener('pageshow', function (e) { if (e.persisted) { var s = savedLang(); if (s) applyLang(s); } });
+  window.addEventListener('storage', function (e) {
+    if (e.key === LANG_KEY && (e.newValue === 'es' || e.newValue === 'en')) applyLang(e.newValue);
+  });
+
+  // ---------- formulario ----------
+  function bi(es, en) { return '<span lang="es">' + es + '</span><span lang="en">' + en + '</span>'; }
+  function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  var form = document.getElementById('contact-form');
+  var nameEl = document.getElementById('name'), emailEl = document.getElementById('email');
+  var topicEl = document.getElementById('topic'), msgEl = document.getElementById('message');
+  var honeyEl = document.getElementById('hp-field');
+  var sendBtn = document.getElementById('send'), statusEl = document.getElementById('status');
+  var countEl = document.getElementById('message-count');
+  var TOPICS = { question: 'Pregunta / Question', bug: 'Error o problema / Bug or problem', idea: 'Sugerencia / Suggestion', other: 'Otro / Other' };
+  var sending = false;
+
+  function setErr(el, es, en) {
+    var p = document.getElementById(el.id + '-err');
+    if (es) { p.innerHTML = bi(es, en); p.hidden = false; el.setAttribute('aria-invalid', 'true'); }
+    else { p.hidden = true; p.innerHTML = ''; el.removeAttribute('aria-invalid'); }
+  }
+  function validate() {
+    var first = null;
+    var name = nameEl.value.trim(), email = emailEl.value.trim(), msg = msgEl.value.trim();
+    if (!name) { setErr(nameEl, 'Escribe tu nombre.', 'Please enter your name.'); first = first || nameEl; } else setErr(nameEl);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr(emailEl, 'Escribe un correo válido para poder responderte.', 'Enter a valid email so we can reply.'); first = first || emailEl; } else setErr(emailEl);
+    if (msg.length < 10) { setErr(msgEl, 'El mensaje es demasiado corto (mínimo 10 caracteres).', 'The message is too short (at least 10 characters).'); first = first || msgEl; } else setErr(msgEl);
+    return first;
+  }
+  [nameEl, emailEl, msgEl].forEach(function (el) { el.addEventListener('input', function () { if (el.getAttribute('aria-invalid')) validate(); }); });
+  msgEl.addEventListener('input', function () { countEl.textContent = msgEl.value.length + ' / 3000'; });
+
+  function show(kind, html) {
+    statusEl.className = 'status' + (kind ? ' ' + kind : '');
+    statusEl.innerHTML = html;
+    statusEl.hidden = false;
+  }
+  function mailtoHref(subject, body) {
+    return 'mailto:' + TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body.slice(0, 1500));
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sending) return;
+    var bad = validate();
+    if (bad) { bad.focus(); return; }
+
+    var name = nameEl.value.trim(), email = emailEl.value.trim(), msg = msgEl.value.trim();
+    var subject = '[UE4ModLauncher web] ' + topicEl.value + ' - ' + name;
+
+    // Anti-spam: un robot rellena el campo oculto. Se simula el éxito sin enviar nada.
+    if (honeyEl.value) { show('ok', bi('Mensaje enviado.', 'Message sent.')); form.reset(); return; }
+
+    sending = true; sendBtn.disabled = true; sendBtn.setAttribute('aria-busy', 'true');
+    show('', bi('Enviando…', 'Sending…'));
+
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: name, email: email, topic: TOPICS[topicEl.value] || topicEl.value, message: msg,
+        language: root.getAttribute('lang'), page: location.href.split('?')[0],
+        _subject: subject, _template: 'table', _captcha: 'false', _honey: ''
+      })
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!(res.ok && (res.d.success === true || res.d.success === 'true'))) throw new Error((res.d && res.d.message) ? String(res.d.message) : 'send failed (HTTP ' + (res.ok ? 'ok' : 'error') + ')');
+        form.reset(); countEl.textContent = '0 / 3000';
+        show('ok', bi('¡Mensaje enviado! Gracias, te responderemos al correo que has indicado.', 'Message sent! Thank you, we will reply to the email you gave.'));
+        statusEl.focus();
+      })
+      .catch(function (err) {
+        if (window.console) console.error('Contact form:', err && err.message ? err.message : err);
+        var detail = (err && err.message && err.message.indexOf('send failed') !== 0) ? ' <small>(' + escHtml(err.message) + ')</small>' : '';
+        var href = escHtml(mailtoHref(subject, msg + '\n\n' + name + ' <' + email + '>'));
+        show('bad', bi('No se pudo enviar el mensaje desde la web. Tu texto sigue en el formulario. Puedes <a href="' + href + '">enviarlo desde tu aplicación de correo</a> o intentarlo de nuevo más tarde.' + detail,
+                       'The message could not be sent from the website. Your text is still in the form. You can <a href="' + href + '">send it from your email app</a> or try again later.' + detail));
+        statusEl.focus();
+      })
+      .then(function () { sending = false; sendBtn.disabled = false; sendBtn.removeAttribute('aria-busy'); });
+  });
+
+  // ---------- índice: resalta la sección actual al hacer scroll ----------
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var navlinks = Array.prototype.slice.call(document.querySelectorAll('.navlink'));
+  function setActive(id) {
+    navlinks.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+  }
+  if ('IntersectionObserver' in window && sections.length) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) { setActive(entry.target.id); } });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

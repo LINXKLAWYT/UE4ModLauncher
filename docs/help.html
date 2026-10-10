@@ -103,6 +103,7 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
       <a href="index.html"><span lang="es">Inicio</span><span lang="en">Home</span></a>
       <a href="download.html"><span lang="es">Descargas</span><span lang="en">Downloads</span></a>
       <a href="help.html" class="active" aria-current="page"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="contact.html"><span lang="es">Contacto</span><span lang="en">Contact</span></a>
       <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
     </nav>
     <div class="tools">
@@ -394,6 +395,7 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
     <span class="mono">UE4ModLauncher</span>
     <div class="foot-links">
       <a href="help.html"><span lang="es">Ayuda</span><span lang="en">Help</span></a>
+      <a href="contact.html"><span lang="es">Contacto</span><span lang="en">Contact</span></a>
       <a href="https://github.com/LINXKLAWYT/UE4ModLauncher" target="_blank" rel="noopener">GitHub</a>
       <a href="download.html"><span lang="es">Versiones</span><span lang="en">Releases</span></a>
       <a href="https://github.com/LINXKLAWYT/UE4ModLauncher/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
@@ -412,8 +414,44 @@ footer{padding:36px 0;color:var(--muted);font-size:13.5px}
     btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
     document.title = l === 'es' ? 'UE4 Mod Launcher · Ayuda' : 'UE4 Mod Launcher · Help';
   }
-  btns.forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.set); }); });
-  setLang((navigator.language || 'es').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+  // ---------- idioma recordado entre páginas ----------
+  // El idioma elegido se guarda y se aplica en todas las páginas. Los enlaces
+  // internos llevan además ?lang= por si el navegador no comparte el
+  // almacenamiento entre páginas (p. ej. al abrir los .html desde disco).
+  var LANG_KEY = 'ue4ml_lang';
+  function savedLang() {
+    try { var v = localStorage.getItem(LANG_KEY); return (v === 'es' || v === 'en') ? v : null; } catch (e) { return null; }
+  }
+  function urlLang() {
+    var m = /[?&]lang=(es|en)(?:&|$)/.exec(location.search);
+    return m ? m[1] : null;
+  }
+  function rememberLang(l) { try { localStorage.setItem(LANG_KEY, l); } catch (e) {} }
+  function tagLinks(l) {
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      var base = a.getAttribute('data-base') || a.getAttribute('href');
+      var m = /^((?:index|help|download|contact)\.html)(#.*)?$/.exec(base);
+      if (!m) return;
+      a.setAttribute('data-base', base);
+      a.setAttribute('href', m[1] + '?lang=' + l + (m[2] || ''));
+    });
+  }
+  function applyLang(l) { setLang(l); tagLinks(l); }
+
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () { rememberLang(b.dataset.set); applyLang(b.dataset.set); });
+  });
+  var firstLang = urlLang() || savedLang() || ((navigator.language || 'es').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+  applyLang(firstLang);
+  if (urlLang()) {
+    rememberLang(firstLang);
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}   // dejar la URL limpia
+  }
+  // Volver atrás (página en caché) o cambiar el idioma en otra pestaña.
+  window.addEventListener('pageshow', function (e) { if (e.persisted) { var s = savedLang(); if (s) applyLang(s); } });
+  window.addEventListener('storage', function (e) {
+    if (e.key === LANG_KEY && (e.newValue === 'es' || e.newValue === 'en')) applyLang(e.newValue);
+  });
 
   // Click (or Enter/Space) on a path to copy it.
   function copy(el) {
