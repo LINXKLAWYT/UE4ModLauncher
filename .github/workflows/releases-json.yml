@@ -1,0 +1,34 @@
+# Genera docs/releases.json con las releases publicadas. La web de descargas lo usa
+# como copia de seguridad cuando la API de GitHub falla o limita las consultas.
+name: Update releases.json
+
+on:
+  release:
+    types: [published, edited, deleted, released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Build docs/releases.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/releases?per_page=100" \
+            --jq '[.[] | {tag_name, draft, prerelease, published_at, body}]' > docs/releases.json
+      - name: Commit if changed
+        run: |
+          if [ -n "$(git status --porcelain docs/releases.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/releases.json
+            git commit -m "Update releases.json"
+            git push
+          fi
