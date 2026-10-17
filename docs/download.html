@@ -176,7 +176,7 @@ button.btn{font:inherit;font-weight:700}
     </section>
 
     <!-- Las versiones se generan solas en el navegador a partir de las releases de GitHub
-         (tags con el formato V1.2). Ver el script de abajo. -->
+         (tags con el formato V1.2 o V1.6.1). Ver el script de abajo. -->
     <div class="rel-tools">
       <button type="button" class="btn outline" id="rel-reload">
         <span lang="es">Recargar versiones</span><span lang="en">Reload versions</span>
@@ -220,8 +220,8 @@ button.btn{font:inherit;font-weight:700}
 (function () {
   var REPO = 'LINXKLAWYT/UE4ModLauncher';
   var API = 'https://api.github.com/repos/' + REPO + '/releases?per_page=100';
-  var TAG_RE = /^V(\d+)\.(\d+)$/i;           // tags del tipo V1.2
-  var CACHE_KEY = 'ue4ml_releases_v1', CACHE_MS = 10 * 60 * 1000;
+  var TAG_RE = /^V(\d+)\.(\d+)(?:\.(\d+))?$/i;  // tags del tipo V1.2 o V1.6.1
+  var CACHE_KEY = 'ue4ml_releases_v2', CACHE_MS = 10 * 60 * 1000;
 
   var root = document.documentElement;
   var btns = document.querySelectorAll('.seg button');
@@ -353,7 +353,7 @@ button.btn{font:inherit;font-weight:700}
         var data = list.filter(function (r) { return !r.draft && TAG_RE.test(r.tag_name || ''); })
           .map(function (r) {
             var m = r.tag_name.match(TAG_RE);
-            return { tag: r.tag_name, major: +m[1], minor: +m[2], body: r.body || '', date: r.published_at || '', pre: !!r.prerelease };
+            return { tag: r.tag_name, major: +m[1], minor: +m[2], patch: m[3] === undefined ? null : +m[3], body: r.body || '', date: r.published_at || '', pre: !!r.prerelease };
           });
         writeCache(data);
         return data;
@@ -367,14 +367,15 @@ button.btn{font:inherit;font-weight:700}
 
   // ---------- pintado ----------
   function render(data) {
-    data.sort(function (a, b) { return b.major - a.major || b.minor - a.minor; });
+    data.sort(function (a, b) {  });
     var holder = document.getElementById('releases');
     var side = document.getElementById('idx-side'), chips = document.getElementById('idx-chips');
     var html = '', idx = '';
     clearIndex();
 
     data.forEach(function (r, i) {
-      var ver = r.major + '.' + r.minor, id = 'v' + r.major + '-' + r.minor;
+      var ver = r.major + '.' + r.minor + (r.patch != null ? '.' + r.patch : ''),
+          id = 'v' + ver.replace(/\./g, '-');
       var parts = splitLangs(r.body), nEs = notes(parts.es, ver), nEn = notes(parts.en, ver);
       var date = '';
       if (r.date) {
