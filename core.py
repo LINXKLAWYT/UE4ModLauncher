@@ -602,11 +602,17 @@ class ModLogic:
 
         game_mods_folder = os.path.join(paks_path, "~mods")
 
-        # Deploy only the mods selected in the launcher. Older profiles without
-        # selected_mods retain the previous behaviour (all mods enabled).
-        selected_mods = cfg.get("selected_mods")
-        if selected_mods is None:
-            selected_mods = [f for f in os.listdir(mods_dir) if f.lower().endswith('.pak')] if os.path.isdir(mods_dir) else []
+        # Deploy every mod EXCEPT the ones the user switched off in the
+        # launcher. Storing the disabled ones (instead of the enabled ones)
+        # means mods added later are active by default and never get
+        # silently left out.
+        disabled = cfg.get("disabled_mods")
+        disabled = set(disabled) if isinstance(disabled, list) else set()
+        try:
+            all_paks = [f for f in os.listdir(mods_dir) if f.lower().endswith('.pak')] if os.path.isdir(mods_dir) else []
+        except OSError:
+            all_paks = []
+        selected_mods = sorted(f for f in all_paks if f not in disabled)
         moved_in, failed_in = ModLogic._move_selected_mods_with_retry(
             mods_dir, game_mods_folder, selected_mods, attempts=2, delay=1.0
         )

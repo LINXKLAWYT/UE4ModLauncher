@@ -196,15 +196,17 @@ class HomeView(ctk.CTkFrame):
         except OSError:
             mods = []
 
-        # Leer la selección guardada para este perfil. Si es un perfil antiguo
-        # sin selección guardada, todos los mods quedan activados por defecto.
-        selected = None
+        # Leer los mods desactivados de este perfil. Todo lo demás (incluidos
+        # los mods nuevos) queda activado por defecto.
+        disabled = set()
         if prof != "---":
             cfg_file = os.path.join(config.PROFILES_DIR, prof, "profile_config.json")
             try:
                 with open(cfg_file, 'r', encoding='utf-8') as f:
                     profile_cfg = json.load(f)
-                selected = profile_cfg.get("selected_mods")
+                saved = profile_cfg.get("disabled_mods")
+                if isinstance(saved, list):
+                    disabled = set(saved)
             except (OSError, json.JSONDecodeError):
                 pass
 
@@ -217,7 +219,7 @@ class HomeView(ctk.CTkFrame):
                 ctk.CTkLabel(self.mods_checklist, text=self.t("no_mods")).pack(anchor="w", padx=8, pady=8)
             else:
                 for name in mods:
-                    var = ctk.BooleanVar(value=(name in selected if selected is not None else True))
+                    var = ctk.BooleanVar(value=(name not in disabled))
                     self._mod_vars[name] = var
                     ctk.CTkCheckBox(
                         self.mods_checklist, text=name, variable=var,
@@ -236,7 +238,14 @@ class HomeView(ctk.CTkFrame):
             if os.path.isfile(cfg_file):
                 with open(cfg_file, 'r', encoding='utf-8') as f:
                     existing = json.load(f)
-            existing["selected_mods"] = [name for name, var in self._mod_vars.items() if var.get()]
+            # Conservar los desactivados de mods que ahora no están en la carpeta
+            # y añadir los que se acaban de desmarcar.
+            previous = existing.get("disabled_mods")
+            previous = previous if isinstance(previous, list) else []
+            keep = [n for n in previous if n not in self._mod_vars]
+            off = [name for name, var in self._mod_vars.items() if not var.get()]
+            existing["disabled_mods"] = sorted(set(keep + off))
+            existing.pop("selected_mods", None)  # formato antiguo (causaba mods sin activar)
             with open(cfg_file, 'w', encoding='utf-8') as f:
                 json.dump(existing, f, indent=4)
         except (OSError, json.JSONDecodeError) as e:
@@ -289,6 +298,9 @@ class HomeView(ctk.CTkFrame):
         if not self._uuu_selection_ok():
             self.app.notify("error", self.t("err_uuu_dll"), title=self.t("err_launch_title"))
             return
+
+        if self._mod_vars and not any(v.get() for v in self._mod_vars.values()):
+            self.app.notify("info", self.t("all_mods_disabled"), title=self.t("err_launch_title"))
 
         # Jugar usa lo que se ve en los campos aunque no se pulsara "Guardar".
         self._persist_profile_fields(prof)

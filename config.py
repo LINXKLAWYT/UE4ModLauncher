@@ -9,7 +9,7 @@ APP_NAME = "UE4ModLauncher"
 
 # Bump this on every release so it matches the tag you publish on GitHub
 # (e.g. tag "v1.2.0" -> APP_VERSION = "1.2.0"); the update check compares them.
-APP_VERSION = "1.6.0"
+APP_VERSION = "1.6.1"
 GITHUB_REPO = "LINXKLAWYT/UE4ModLauncher"
 RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
 LATEST_RELEASE_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
@@ -252,6 +252,7 @@ LANG = {
         "loc_confirm_title": "Migrate profiles?",
         "loc_confirm_msg": "Profiles and their mods will be copied to:\n{path}\nand, once the copy is verified, removed from the current location.",
         "btn_loc_confirm": "Migrate",
+        "all_mods_disabled": "All mods are switched off, so none will be loaded into the game.",
         "loc_busy": "Migrating profiles… wait until it finishes.",
         "loc_done_title": "Migration finished",
         "loc_err_unexpected": "Unexpected error while migrating: {detail}",
@@ -348,6 +349,7 @@ LANG = {
         "loc_confirm_title": "¿Migrar los perfiles?",
         "loc_confirm_msg": "Los perfiles y sus mods se copiarán a:\n{path}\ny, cuando la copia esté verificada, se quitarán de la ubicación actual.",
         "btn_loc_confirm": "Migrar",
+        "all_mods_disabled": "Todos los mods están desactivados, así que no se cargará ninguno en el juego.",
         "loc_busy": "Migrando perfiles… espera a que termine.",
         "loc_done_title": "Migración terminada",
         "loc_err_unexpected": "Error inesperado al migrar: {detail}",
