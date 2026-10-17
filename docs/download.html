@@ -347,8 +347,10 @@ button.btn{font:inherit;font-weight:700}
     if (force) { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
     var cached = force ? null : readCache(false);
     if (cached) return Promise.resolve(cached);
-    return fetch(API, { headers: { 'Accept': 'application/vnd.github+json' }, cache: force ? 'no-store' : 'default' })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 10000) : null;   // nunca quedarse en "Cargando…"
+    return fetch(API, { headers: { 'Accept': 'application/vnd.github+json' }, cache: force ? 'no-store' : 'default', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (timer) clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (list) {
         var data = list.filter(function (r) { return !r.draft && TAG_RE.test(r.tag_name || ''); })
           .map(function (r) {
@@ -359,6 +361,7 @@ button.btn{font:inherit;font-weight:700}
         return data;
       })
       .catch(function (err) {
+        if (timer) clearTimeout(timer);
         var stale = force ? null : readCache(true);   // al recargar a mano no se enseñan datos viejos
         if (stale) return stale;
         throw err;
@@ -367,7 +370,7 @@ button.btn{font:inherit;font-weight:700}
 
   // ---------- pintado ----------
   function render(data) {
-    data.sort(function (a, b) {  });
+    data.sort(function (a, b) { return b.major - a.major || b.minor - a.minor || (b.patch || 0) - (a.patch || 0); });
     var holder = document.getElementById('releases');
     var side = document.getElementById('idx-side'), chips = document.getElementById('idx-chips');
     var html = '', idx = '';
