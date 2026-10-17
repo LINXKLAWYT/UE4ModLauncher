@@ -317,7 +317,7 @@ button.btn{font:inherit;font-weight:700}
   function splitLangs(body) {
     var es = [], en = [], cur = null, found = false;
     body.replace(/\r/g, '').split('\n').forEach(function (line) {
-      var t = line.replace(/^[#\s*_]+/, '').replace(/[\s*_:]+$/, '').toLowerCase();
+      var t = line.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\uFE0F]/gu, '').replace(/^[#\s*_]+/, '').replace(/[\s*_:]+$/, '').toLowerCase();
       if (/^(español|espanol|spanish|es)$/.test(t)) { cur = es; found = true; return; }
       if (/^(english|inglés|ingles|en)$/.test(t)) { cur = en; found = true; return; }
       if (cur) cur.push(line);
@@ -347,24 +347,39 @@ button.btn{font:inherit;font-weight:700}
     if (force) { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
     var cached = force ? null : readCache(false);
     if (cached) return Promise.resolve(cached);
-    var ctl = ('AbortController' in window) ? new AbortController() : null;
-    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 10000) : null;   // nunca quedarse en "Cargando…"
-    return fetch(API, { headers: { 'Accept': 'application/vnd.github+json' }, cache: force ? 'no-store' : 'default', signal: ctl ? ctl.signal : undefined })
-      .then(function (r) { if (timer) clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    return fetchJson(API, force)
+      .catch(function (apiErr) {
+        // GitHub limita la API (60 consultas/hora por IP): usar la copia estática
+        // docs/releases.json, que genera una GitHub Action al publicar una release.
+        return fetchJson('releases.json?t=' + Date.now(), true)
+          .catch(function () { throw apiErr; });
+      })
       .then(function (list) {
-        var data = list.filter(function (r) { return !r.draft && TAG_RE.test(r.tag_name || ''); })
-          .map(function (r) {
-            var m = r.tag_name.match(TAG_RE);
-            return { tag: r.tag_name, major: +m[1], minor: +m[2], patch: m[3] === undefined ? null : +m[3], body: r.body || '', date: r.published_at || '', pre: !!r.prerelease };
-          });
+        var data = normalize(list);
         writeCache(data);
         return data;
       })
       .catch(function (err) {
-        if (timer) clearTimeout(timer);
         var stale = force ? null : readCache(true);   // al recargar a mano no se enseñan datos viejos
         if (stale) return stale;
         throw err;
+      });
+  }
+
+  function fetchJson(url, noStore) {
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 10000) : null;   // nunca quedarse en "Cargando…"
+    return fetch(url, { headers: { 'Accept': 'application/vnd.github+json' }, cache: noStore ? 'no-store' : 'default', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (timer) clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (list) { if (!Array.isArray(list)) throw new Error('bad data'); return list; })
+      .catch(function (e) { if (timer) clearTimeout(timer); throw e; });
+  }
+
+  function normalize(list) {
+    return list.filter(function (r) { return !r.draft && TAG_RE.test(r.tag_name || ''); })
+      .map(function (r) {
+        var m = r.tag_name.match(TAG_RE);
+        return { tag: r.tag_name, major: +m[1], minor: +m[2], patch: m[3] === undefined ? null : +m[3], body: r.body || '', date: r.published_at || '', pre: !!r.prerelease };
       });
   }
 
@@ -418,13 +433,14 @@ button.btn{font:inherit;font-weight:700}
     document.querySelectorAll('#idx-side [data-dyn], #idx-chips [data-dyn]').forEach(function (li) { li.remove(); });
   }
 
-  function showError() {
+  function showError(err) {
     clearIndex();
     initSpy();
     document.getElementById('releases').innerHTML =
       '<p class="todo">' + bi('No se pudieron cargar las versiones ahora mismo.', 'Could not load the versions right now.') + '</p>'
       + '<p><a class="btn" href="https://github.com/' + REPO + '/releases" target="_blank" rel="noopener">'
-      + bi('Ver las versiones en GitHub', 'See the versions on GitHub') + '</a></p>';
+      + bi('Ver las versiones en GitHub', 'See the versions on GitHub') + '</a></p>'
+      + (err && err.message ? '<p class="todo"><small>' + esc(err.message) + '</small></p>' : '');
   }
 
   // ---------- índice: resalta la sección actual al hacer scroll ----------
